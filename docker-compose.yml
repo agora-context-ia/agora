@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: contexthub
+      POSTGRES_PASSWORD: contexthub
+      POSTGRES_DB: contexthub
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./apps/backend
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgres://contexthub:contexthub@postgres:5432/contexthub
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./apps/frontend
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,12 @@
+{
+  "name": "contexthub-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "pnpm --filter @contexthub-ai/backend dev",
+    "dev:frontend": "pnpm --filter @contexthub-ai/frontend dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

@@ -20,5 +20,10 @@ export function setSessionCookie(res: Response, token: string, expiresAt: Date):
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(SESSION_COOKIE_NAME, baseOptions());
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: env.COOKIE_SECURE,
+    path: '/',
+  });
 }

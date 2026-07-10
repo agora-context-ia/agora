@@ -3,6 +3,8 @@ import cors from 'cors';
 import express from 'express';
 import { env } from '../config/env';
 import { authRouter } from './routes/auth.routes';
+import { organizationsRouter } from './routes/organizations.routes';
+import { spacesRouter } from './routes/spaces.routes';
 
 export function startServer() {
   const app = express();
@@ -18,6 +20,8 @@ export function startServer() {
   });
 
   app.use('/api/auth', authRouter);
+  app.use('/api/organizations', organizationsRouter);
+  app.use('/api/organizations/:orgId/spaces', spacesRouter);
 
   app.listen(env.PORT, () => {
     console.log(`API escuchando en http://localhost:${env.PORT}`);

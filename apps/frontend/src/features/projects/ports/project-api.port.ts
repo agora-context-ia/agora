@@ -7,6 +7,6 @@ export interface CreateProjectInput {
 }
 
 export interface ProjectApiPort {
-  list(): Promise<Project[]>;
+  list(organizationId: string): Promise<Project[]>;
   create(input: CreateProjectInput): Promise<Project>;
 }

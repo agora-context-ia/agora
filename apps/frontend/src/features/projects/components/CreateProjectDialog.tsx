@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { mockProjectApiAdapter } from '../infra/mock-project-api.adapter';
+import { ApiError } from '@/lib/api';
+import { projectApiAdapter } from '../infra/http-project-api.adapter';
 import { useProjectStore } from '../application/use-active-project';
 import { useOrganizationStore } from '@/features/organizations/application/use-active-organization';
 
@@ -21,6 +22,7 @@ export function CreateProjectDialog() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const addProject = useProjectStore((state) => state.addProject);
   const activeOrganizationId = useOrganizationStore((state) => state.activeOrganizationId);
 
@@ -28,20 +30,32 @@ export function CreateProjectDialog() {
     if (!name.trim() || !activeOrganizationId) return;
 
     setIsSubmitting(true);
-    const project = await mockProjectApiAdapter.create({
-      organizationId: activeOrganizationId,
-      name: name.trim(),
-      description: description.trim(),
-    });
-    addProject(project);
-    setIsSubmitting(false);
-    setOpen(false);
-    setName('');
-    setDescription('');
+    setError(null);
+    try {
+      const project = await projectApiAdapter.create({
+        organizationId: activeOrganizationId,
+        name: name.trim(),
+        description: description.trim(),
+      });
+      addProject(project);
+      setOpen(false);
+      setName('');
+      setDescription('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo conectar con el servidor');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value);
+        if (!value) setError(null);
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="w-full">
           <Plus className="h-4 w-4" />
@@ -60,6 +74,7 @@ export function CreateProjectDialog() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>

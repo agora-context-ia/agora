@@ -9,6 +9,7 @@ interface OrganizationStoreState {
   setOrganizations: (organizations: Organization[]) => void;
   setLoading: (isLoading: boolean) => void;
   setActiveOrganization: (organizationId: string) => void;
+  addOrganization: (organization: Organization) => void;
 }
 
 export const useOrganizationStore = create<OrganizationStoreState>((set) => ({
@@ -24,6 +25,12 @@ export const useOrganizationStore = create<OrganizationStoreState>((set) => ({
     })),
   setLoading: (isLoading) => set({ isLoading }),
   setActiveOrganization: (organizationId) => set({ activeOrganizationId: organizationId }),
+  addOrganization: (organization) =>
+    set((state) => ({
+      organizations: [...state.organizations, organization],
+      activeOrganizationId: organization.id,
+      hasLoaded: true,
+    })),
 }));
 
 export function useActiveOrganization(): Organization | null {

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, Moon, Sun } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { OrganizationMenu } from '@/features/organizations/components/OrganizationMenu';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/lib/use-theme';
 import { useCurrentUser } from '../application/use-current-user';
 import { useLogout } from '../application/use-logout';
 
@@ -20,6 +21,7 @@ export function UserSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useCurrentUser();
   const { logout, isLoggingOut } = useLogout();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <aside
@@ -61,7 +63,16 @@ export function UserSidebar() {
         <OrganizationMenu collapsed={collapsed} onRequestExpand={() => setCollapsed(false)} />
       </nav>
 
-      <div className="border-t p-3">
+      <div className={cn('flex border-t p-3', collapsed ? 'flex-col gap-1' : 'flex-col gap-1')}>
+        <Button
+          variant="ghost"
+          onClick={toggleTheme}
+          className={cn('w-full text-muted-foreground', collapsed ? 'justify-center px-0' : 'justify-start gap-2')}
+        >
+          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {!collapsed && <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>}
+        </Button>
+
         <Button
           variant="ghost"
           disabled={isLoggingOut}

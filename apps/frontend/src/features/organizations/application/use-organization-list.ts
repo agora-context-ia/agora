@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { mockOrganizationApiAdapter } from '../infra/mock-organization-api.adapter';
+import { organizationApiAdapter } from '../infra/http-organization-api.adapter';
 import { useOrganizationStore } from './use-active-organization';
 
 export function useOrganizationList() {
@@ -15,16 +15,24 @@ export function useOrganizationList() {
     let cancelled = false;
     setLoading(true);
 
-    mockOrganizationApiAdapter.list().then((result) => {
-      if (cancelled) return;
-      setOrganizations(result);
-      setLoading(false);
-    });
+    organizationApiAdapter
+      .list()
+      .then((result) => {
+        if (cancelled) return;
+        setOrganizations(result);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setOrganizations([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     return () => {
       cancelled = true;
     };
   }, [hasLoaded, setLoading, setOrganizations]);
 
-  return { organizations, isLoading };
+  return { organizations, isLoading, hasLoaded };
 }

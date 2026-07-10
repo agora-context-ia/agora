@@ -4,6 +4,7 @@ import {
   InvalidCredentialsError,
 } from '../../../contexts/identity/modules/auth/domain/auth-user';
 import { container } from '../../container';
+import { requireAuth } from '../require-auth';
 import {
   SESSION_COOKIE_NAME,
   clearSessionCookie,
@@ -88,17 +89,6 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
   return res.status(204).end();
 });
 
-authRouter.get('/me', async (req: Request, res: Response) => {
-  const token = readSessionToken(req);
-  if (!token) {
-    return res.status(401).json({ error: 'No autenticado' });
-  }
-
-  const user = await container.getCurrentUser.execute(token);
-  if (!user) {
-    clearSessionCookie(res);
-    return res.status(401).json({ error: 'Sesión expirada o inválida' });
-  }
-
-  return res.json({ user });
+authRouter.get('/me', requireAuth, (req: Request, res: Response) => {
+  return res.json({ user: req.authUser });
 });

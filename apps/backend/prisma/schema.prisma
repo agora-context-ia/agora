@@ -14,7 +14,7 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   extensions = [vector, pg_trgm, citext]
-  schemas    = ["security", "main", "ai"]
+  schemas    = ["security", "main", "ai", "parameters"]
 }
 
 // =====================================================================
@@ -237,24 +237,39 @@ model ContextSource {
   @@schema("main")
 }
 
-model ContextDocument {
-  id            String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  sourceId      String    @map("source_id") @db.Uuid
-  spaceId       String    @map("space_id") @db.Uuid
-  fileName      String    @map("file_name") @db.VarChar(255)
-  filePath      String    @map("file_path")
-  mimeType      String?   @map("mime_type") @db.VarChar(100)
-  fileSizeBytes BigInt?   @map("file_size_bytes")
-  status        Boolean   @default(true)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  deletedAt     DateTime? @map("deleted_at")
+enum DocumentProcessingStatus {
+  pending
+  processing
+  ready
+  error
 
-  source ContextSource @relation(fields: [sourceId], references: [id])
-  space  Space         @relation(fields: [spaceId], references: [id])
+  @@map("document_processing_status")
+  @@schema("main")
+}
+
+model ContextDocument {
+  id               String                   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  sourceId         String                   @map("source_id") @db.Uuid
+  spaceId          String                   @map("space_id") @db.Uuid
+  fileName         String                   @map("file_name") @db.VarChar(255)
+  filePath         String                   @map("file_path")
+  mimeType         String?                  @map("mime_type") @db.VarChar(100)
+  fileSizeBytes    BigInt?                  @map("file_size_bytes")
+  processingStatus DocumentProcessingStatus @default(pending) @map("processing_status")
+  processingError  String?                  @map("processing_error")
+  classificationId String?                  @map("classification_id") @db.Uuid
+  status           Boolean                  @default(true)
+  createdAt        DateTime                 @default(now()) @map("created_at")
+  updatedAt        DateTime                 @updatedAt @map("updated_at")
+  deletedAt        DateTime?                @map("deleted_at")
+
+  source         ContextSource @relation(fields: [sourceId], references: [id])
+  space          Space         @relation(fields: [spaceId], references: [id])
+  classification CatalogItem?  @relation(fields: [classificationId], references: [id])
 
   @@index([spaceId])
   @@index([sourceId])
+  @@index([classificationId])
   @@map("context_documents")
   @@schema("main")
 }
@@ -431,4 +446,47 @@ model PromptTemplate {
 
   @@map("prompt_templates")
   @@schema("ai")
+}
+
+// =====================================================================
+// parameters — catálogos genéricos (cabecera + ítems) con code estable.
+// El code es el contrato con el código de aplicación; name es editable.
+// Los índices únicos son parciales (WHERE deleted_at IS NULL) y viven
+// solo en la migración SQL, igual que en el resto del schema.
+// =====================================================================
+
+model Catalog {
+  id          String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  code        String    @db.VarChar(60)
+  name        String    @db.VarChar(120)
+  description String?
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  items CatalogItem[]
+
+  @@map("catalogs")
+  @@schema("parameters")
+}
+
+model CatalogItem {
+  id          String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  catalogId   String    @map("catalog_id") @db.Uuid
+  code        String    @db.VarChar(60)
+  name        String    @db.VarChar(120)
+  description String?
+  sortOrder   Int       @default(0) @map("sort_order")
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  catalog   Catalog           @relation(fields: [catalogId], references: [id])
+  documents ContextDocument[]
+
+  @@index([catalogId])
+  @@map("catalog_items")
+  @@schema("parameters")
 }

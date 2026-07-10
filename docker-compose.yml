@@ -21,15 +21,29 @@ services:
     ports:
       - '${REDIS_PORT}:6379'
 
+  # Servidor de embeddings local. Modelos persistidos en volumen (pesan GB).
+  # Descarga inicial (una vez): docker compose exec ollama ollama pull nomic-embed-text
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - '${OLLAMA_PORT:-11434}:11434'
+    volumes:
+      - ollama_models:/root/.ollama
+
   backend:
     build: ./apps/backend
     ports:
       - '3000:3000'
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      OLLAMA_BASE_URL: http://ollama:11434
+    volumes:
+      - backend_uploads:/app/storage/uploads
     depends_on:
       - postgres
       - redis
+      - ollama
 
   frontend:
     build: ./apps/frontend
@@ -40,3 +54,5 @@ services:
 
 volumes:
   postgres_data:
+  ollama_models:
+  backend_uploads:

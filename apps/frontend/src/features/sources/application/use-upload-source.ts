@@ -1,25 +1,39 @@
 import { useCallback, useState } from 'react';
-import { mockSourceApiAdapter } from '../infra/mock-source-api.adapter';
+import { ApiError } from '@/lib/api';
+import { sourceApiAdapter } from '../infra/http-source-api.adapter';
 import { useSourceStore } from './use-sources';
 
-/** Caso de uso: subir un archivo nuevo para el proyecto activo y reflejar en la UI cada etapa del pipeline mock (cargado → procesando → procesado) a medida que ocurre. */
-export function useUploadSource(projectId: string | null) {
+/**
+ * Sube un archivo con su clasificación. El documento entra en pending y su
+ * avance (processing → ready | error) llega por SSE, que refetchea la lista.
+ */
+export function useUploadSource(organizationId: string | null, projectId: string | null) {
   const upsertSource = useSourceStore((state) => state.upsertSource);
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const uploadSource = useCallback(
-    async (file: File) => {
-      if (!projectId) return;
+    async (file: File, classificationCode: string) => {
+      if (!organizationId || !projectId) return;
 
       setIsUploading(true);
+      setError(null);
       try {
-        await mockSourceApiAdapter.upload(projectId, file, (source) => upsertSource(projectId, source));
+        const source = await sourceApiAdapter.upload(
+          organizationId,
+          projectId,
+          file,
+          classificationCode,
+        );
+        upsertSource(projectId, source);
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'No se pudo conectar con el servidor');
       } finally {
         setIsUploading(false);
       }
     },
-    [projectId, upsertSource],
+    [organizationId, projectId, upsertSource],
   );
 
-  return { uploadSource, isUploading };
+  return { uploadSource, isUploading, error };
 }

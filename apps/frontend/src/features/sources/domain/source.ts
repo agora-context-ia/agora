@@ -1,14 +1,11 @@
-/** Estados posibles de una fuente durante su procesamiento, según el flujo definido en el spec funcional. */
-export type SourceStatus = 'cargado' | 'procesando' | 'procesado' | 'error';
+/** Estados del pipeline real de procesamiento (upload → chunking → embeddings). */
+export type SourceStatus = 'pending' | 'processing' | 'ready' | 'error';
 
 export type SourceFileType = 'pdf' | 'txt' | 'docx' | 'md' | 'csv' | 'json';
 
-export interface Comment {
-  id: string;
-  sourceId: string;
-  author: string;
-  text: string;
-  createdAt: string;
+export interface SourceClassification {
+  code: string;
+  name: string;
 }
 
 export interface Source {
@@ -17,7 +14,7 @@ export interface Source {
   fileName: string;
   fileType: SourceFileType;
   status: SourceStatus;
-  isActive: boolean;
+  classification: SourceClassification | null;
+  processingError: string | null;
   uploadedAt: string;
-  comments: Comment[];
 }

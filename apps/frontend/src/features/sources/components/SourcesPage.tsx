@@ -1,6 +1,8 @@
 import { ArrowLeft, FolderOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useOrganizationStore } from '@/features/organizations/application/use-active-organization';
+import { useOrganizationList } from '@/features/organizations/application/use-organization-list';
 import { useProjectList } from '@/features/projects/application/use-project-list';
 import { useSources } from '../application/use-sources';
 import { SourceList } from './SourceList';
@@ -9,10 +11,14 @@ import { SourceUploadZone } from './SourceUploadZone';
 export function SourcesPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  // Se llama acá también (no solo en el sidebar) porque se puede entrar directo a esta URL sin haber pasado por "/".
+  // Se llaman acá también (no solo en el shell) porque se puede entrar
+  // directo a esta URL sin pasar por "/": cargan orgs (y fijan la activa)
+  // y los proyectos de esa organización.
+  useOrganizationList();
+  const activeOrganizationId = useOrganizationStore((state) => state.activeOrganizationId);
   const { projects } = useProjectList();
   const project = projects.find((item) => item.id === projectId);
-  const { sources, isLoading } = useSources(projectId ?? null);
+  const { sources, isLoading } = useSources(activeOrganizationId, projectId ?? null);
 
   if (!projectId) return null;
 
@@ -29,7 +35,9 @@ export function SourcesPage() {
       </header>
 
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-6">
-        <SourceUploadZone projectId={projectId} />
+        {activeOrganizationId && (
+          <SourceUploadZone organizationId={activeOrganizationId} projectId={projectId} />
+        )}
 
         {!isLoading && sources.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
@@ -44,7 +52,13 @@ export function SourcesPage() {
             </div>
           </div>
         ) : (
-          <SourceList projectId={projectId} sources={sources} />
+          activeOrganizationId && (
+            <SourceList
+              organizationId={activeOrganizationId}
+              projectId={projectId}
+              sources={sources}
+            />
+          )
         )}
       </div>
     </div>

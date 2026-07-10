@@ -1,11 +1,9 @@
-import { useState } from 'react';
-import { FileJson, FileSpreadsheet, FileText, MessageSquare } from 'lucide-react';
+import { FileJson, FileSpreadsheet, FileText, RefreshCw, Trash2 } from 'lucide-react';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import type { Source, SourceFileType, SourceStatus } from '../domain/source';
-import { useToggleSource } from '../application/use-toggle-source';
-import { SourceCommentsPanel } from './SourceCommentsPanel';
+import { useDeleteSource } from '../application/use-delete-source';
+import { useReprocessSource } from '../application/use-reprocess-source';
 
 const FILE_ICONS: Record<SourceFileType, typeof FileText> = {
   pdf: FileText,
@@ -17,32 +15,30 @@ const FILE_ICONS: Record<SourceFileType, typeof FileText> = {
 };
 
 const STATUS_LABEL: Record<SourceStatus, string> = {
-  cargado: 'Cargado',
-  procesando: 'Procesando',
-  procesado: 'Procesado',
+  pending: 'En cola',
+  processing: 'Procesando…',
+  ready: 'Listo',
   error: 'Error',
 };
 
-// Mapeo semántico: verde = éxito, acento = en curso, rojo = error, gris = estado inicial neutro.
+// Mapeo semántico: verde = éxito, acento = en curso, rojo = error, gris = en cola.
 const STATUS_VARIANT: Record<SourceStatus, BadgeProps['variant']> = {
-  cargado: 'muted',
-  procesando: 'info',
-  procesado: 'success',
+  pending: 'muted',
+  processing: 'info',
+  ready: 'success',
   error: 'destructive',
 };
 
 interface SourceListItemProps {
+  organizationId: string;
   projectId: string;
   source: Source;
 }
 
-export function SourceListItem({ projectId, source }: SourceListItemProps) {
-  const { toggleSource } = useToggleSource(projectId);
-  const [showComments, setShowComments] = useState(false);
+export function SourceListItem({ organizationId, projectId, source }: SourceListItemProps) {
+  const { deleteSource, deletingId } = useDeleteSource(organizationId, projectId);
+  const { reprocessSource, reprocessingId } = useReprocessSource(organizationId, projectId);
   const Icon = FILE_ICONS[source.fileType];
-
-  // Una fuente que todavía no terminó de procesarse o que falló no puede activarse: no hay nada útil que buscar en ella todavía.
-  const isToggleDisabled = source.status === 'procesando' || source.status === 'error';
 
   return (
     <div className="rounded-lg border">
@@ -50,25 +46,39 @@ export function SourceListItem({ projectId, source }: SourceListItemProps) {
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">{source.fileName}</p>
-          <p className="text-xs text-muted-foreground">{new Date(source.uploadedAt).toLocaleDateString('es-AR')}</p>
+          <p className="text-xs text-muted-foreground">
+            {new Date(source.uploadedAt).toLocaleDateString('es-AR')}
+            {source.classification && ` · ${source.classification.name}`}
+          </p>
         </div>
-        <Badge variant={STATUS_VARIANT[source.status]}>{STATUS_LABEL[source.status]}</Badge>
-        <Switch checked={source.isActive} onCheckedChange={() => toggleSource(source)} disabled={isToggleDisabled} />
+        <Badge variant={STATUS_VARIANT[source.status]} title={source.processingError ?? undefined}>
+          {STATUS_LABEL[source.status]}
+        </Badge>
+        {source.status === 'error' && (
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Reintentar procesamiento"
+            onClick={() => reprocessSource(source.id)}
+            disabled={reprocessingId === source.id}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        )}
         <Button
           variant="ghost"
-          size="sm"
-          className="gap-1.5 text-muted-foreground"
-          onClick={() => setShowComments((prev) => !prev)}
+          size="icon"
+          title="Eliminar fuente"
+          className="text-muted-foreground hover:text-destructive"
+          onClick={() => deleteSource(source.id)}
+          disabled={deletingId === source.id}
         >
-          <MessageSquare className="h-4 w-4" />
-          {source.comments.length > 0 && source.comments.length}
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
 
-      {showComments && (
-        <div className="border-t px-4 py-3">
-          <SourceCommentsPanel projectId={projectId} source={source} />
-        </div>
+      {source.status === 'error' && source.processingError && (
+        <p className="border-t px-4 py-2 text-xs text-destructive">{source.processingError}</p>
       )}
     </div>
   );

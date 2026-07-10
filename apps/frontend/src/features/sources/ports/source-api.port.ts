@@ -1,24 +1,23 @@
-import type { Comment, Source } from '../domain/source';
+import type { Source } from '../domain/source';
 
 /**
- * Abstrae el acceso a las fuentes (documentos) de un proyecto: listarlas, subirlas,
- * activarlas/desactivarlas y comentarlas. Existe como interfaz separada del adapter
- * porque hoy la implementación es un mock en memoria (`MockSourceApiAdapter`); cuando
- * exista backend real, se agrega un adapter nuevo (fetch a la API, upload multipart,
- * polling o websocket para el estado de procesamiento) que implemente este mismo
- * contrato, sin que los hooks de `application/` ni los componentes deban cambiar.
+ * Acceso a las fuentes (documentos) de un proyecto contra el backend real.
+ * El estado de procesamiento NO se pollea: llega como evento SSE
+ * (document.updated, ver lib/realtime.ts) y la UI refetchea list().
  */
 export interface SourceApiPort {
-  list(projectId: string): Promise<Source[]>;
+  list(organizationId: string, projectId: string): Promise<Source[]>;
 
-  /**
-   * Sube un archivo nuevo. `onStatusChange` es opcional y se invoca cada vez que la
-   * fuente avanza de estado (cargado → procesando → procesado), para que la UI pueda
-   * reflejar el progreso sin tener que hacer polling manual sobre `list()`.
-   */
-  upload(projectId: string, file: File, onStatusChange?: (source: Source) => void): Promise<Source>;
+  /** Sube el archivo con su clasificación (code del catálogo DOCUMENT_CLASSIFICATION). */
+  upload(
+    organizationId: string,
+    projectId: string,
+    file: File,
+    classificationCode: string,
+  ): Promise<Source>;
 
-  toggleActive(sourceId: string, isActive: boolean): Promise<Source>;
+  remove(organizationId: string, projectId: string, sourceId: string): Promise<void>;
 
-  addComment(sourceId: string, text: string): Promise<Comment>;
+  /** Vuelve a extraer/chunkear/embeber (p. ej. tras un error o cambio de modelo). */
+  reprocess(organizationId: string, projectId: string, sourceId: string): Promise<Source>;
 }

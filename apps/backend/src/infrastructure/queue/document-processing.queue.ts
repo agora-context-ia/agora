@@ -5,6 +5,7 @@ import { createRedisConnection, redisConnection } from '../redis/redis-clients';
 
 const QUEUE_NAME = 'document-processing';
 
+/** BullMQ-backed implementation of the document processing queue port. */
 export class BullMqDocumentProcessingQueue implements DocumentProcessingQueuePort {
   private readonly queue = new Queue(QUEUE_NAME, { connection: redisConnection });
 
@@ -13,7 +14,7 @@ export class BullMqDocumentProcessingQueue implements DocumentProcessingQueuePor
       'process',
       { documentId },
       {
-        attempts: 3, // 1 intento + 2 reintentos
+        attempts: 3, // 1 attempt + 2 retries
         backoff: { type: 'exponential', delay: 3000 },
         removeOnComplete: true,
         removeOnFail: true,
@@ -22,8 +23,10 @@ export class BullMqDocumentProcessingQueue implements DocumentProcessingQueuePor
   }
 }
 
-// Worker en el mismo proceso del API por ahora; si el volumen crece se
-// extrae a un proceso aparte sin tocar el use-case.
+/**
+ * Worker in the same process as the API for now; if volume grows it moves
+ * to a separate process without touching the use case.
+ */
 export function startDocumentProcessingWorker(
   processDocument: ProcessDocumentUseCase,
 ): Worker {

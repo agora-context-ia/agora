@@ -1,11 +1,12 @@
-// Configuración de IA de la organización activa, vista desde el frontend.
-// La API key nunca llega completa: solo apiKeyLastFour.
+// AI configuration of the active organization, as seen by the frontend.
+// The API key never arrives complete: only apiKeyLastFour.
 
 export interface AiModelOption {
   value: string;
   label: string;
 }
 
+/** State of one AI provider: catalog models plus configuration status. */
 export interface AiProviderSetting {
   provider: string;
   label: string;

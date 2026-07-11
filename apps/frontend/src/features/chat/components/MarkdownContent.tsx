@@ -5,9 +5,8 @@ interface MarkdownContentProps {
   content: string;
 }
 
-// Estilos por elemento (no hay plugin typography de Tailwind en el
-// proyecto). Los márgenes son compactos: es una burbuja de chat, no un
-// documento.
+// Per-element styles (the project has no Tailwind typography plugin).
+// Margins are compact: this is a chat bubble, not a document.
 const components: Components = {
   p: ({ children }) => <p className="my-2 leading-relaxed first:mt-0 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>,
@@ -34,8 +33,8 @@ const components: Components = {
     </blockquote>
   ),
   code: ({ children, className }) => {
-    // Sin className de lenguaje = código inline; con él, viene dentro de
-    // un <pre> que ya aporta el fondo.
+    // No language className = inline code; with one, it comes inside a
+    // <pre> that already provides the background.
     const isBlock = typeof className === 'string' && className.startsWith('language-');
     if (isBlock) return <code className={className}>{children}</code>;
     return <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{children}</code>;
@@ -57,8 +56,10 @@ const components: Components = {
   td: ({ children }) => <td className="border border-border px-2 py-1 align-top">{children}</td>,
 };
 
-// Render de las respuestas del asistente: el LLM contesta en Markdown
-// (listas, negritas, código) según su system prompt.
+/**
+ * Renders assistant replies: the LLM answers in Markdown (lists, bold,
+ * code) as instructed by its system prompt.
+ */
 export function MarkdownContent({ content }: MarkdownContentProps) {
   return (
     <div className="text-sm text-foreground">

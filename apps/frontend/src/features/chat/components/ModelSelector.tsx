@@ -16,10 +16,12 @@ interface ModelSelectorProps {
   onModelChange: (model: string | null) => void;
 }
 
-// Selector de proveedor/modelo de IA. Convive con el ModeSelector (tipo
-// de tarea): este elige CON QUÉ modelo se responde. Se alimenta de las
-// keys configuradas por la organización activa; si no hay ninguna, es un
-// CTA que abre Settings directo en la sección Modelos IA.
+/**
+ * AI provider/model selector. Lives next to the ModeSelector (task
+ * type): this one picks WHICH model answers. Fed by the keys configured
+ * for the active organization; with none configured it becomes a CTA
+ * that opens Settings directly on the AI Models section.
+ */
 export function ModelSelector({ model, onModelChange }: ModelSelectorProps) {
   const { providers, isLoading } = useAiProviderSettings();
   const openSettings = useSettingsDialog((state) => state.open);
@@ -38,8 +40,8 @@ export function ModelSelector({ model, onModelChange }: ModelSelectorProps) {
     [providers],
   );
 
-  // Selección por defecto (primer modelo disponible) y limpieza si el
-  // modelo elegido dejó de existir al cambiar de organización.
+  // Default selection (first available model) and cleanup when the
+  // chosen model no longer exists after switching organizations.
   useEffect(() => {
     if (isLoading) return;
     const exists = options.some((option) => option.value === model);

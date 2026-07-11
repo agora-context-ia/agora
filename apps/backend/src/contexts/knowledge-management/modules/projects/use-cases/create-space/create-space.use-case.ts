@@ -7,6 +7,7 @@ import {
 import type { OrganizationMembershipPort } from '../../ports/organization-membership.port';
 import type { SpaceRepositoryPort } from '../../ports/space-repository.port';
 
+/** Creator, organization and display data for the new space. */
 export interface CreateSpaceInput {
   userId: string;
   organizationId: string;
@@ -14,6 +15,7 @@ export interface CreateSpaceInput {
   description?: string;
 }
 
+/** Creates a space in the organization; the slug derives from the name. */
 export class CreateSpaceUseCase {
   constructor(
     private readonly spaces: SpaceRepositoryPort,

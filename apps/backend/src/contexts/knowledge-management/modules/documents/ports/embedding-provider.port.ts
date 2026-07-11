@@ -1,3 +1,4 @@
+/** Thrown when a provider returns vectors of an unexpected dimensionality. */
 export class EmbeddingDimensionMismatchError extends Error {
   constructor(expected: number, received: number, modelName: string) {
     super(
@@ -9,11 +10,11 @@ export class EmbeddingDimensionMismatchError extends Error {
 }
 
 /**
- * Proveedor de embeddings intercambiable (Ollama local, API de Gemini, etc.).
- * Contrato: todos los vectores devueltos tienen exactamente `dimensions`
- * componentes (768: ver plan-carga-documentos.md); `modelName` se persiste
- * junto a cada vector porque embeddings de modelos distintos viven en
- * espacios vectoriales distintos y nunca se mezclan en una búsqueda.
+ * Swappable embeddings provider (local Ollama, Gemini API, etc.).
+ * Contract: every returned vector has exactly `dimensions` components;
+ * `modelName` is persisted next to each vector because embeddings from
+ * different models live in different vector spaces and are never mixed in
+ * one search.
  */
 export interface EmbeddingProviderPort {
   readonly modelName: string;

@@ -10,6 +10,7 @@ interface SourceUploadZoneProps {
   projectId: string;
 }
 
+/** Drag-and-drop / file-picker zone with the mandatory classification select. */
 export function SourceUploadZone({ organizationId, projectId }: SourceUploadZoneProps) {
   const { uploadSource, isUploading, error } = useUploadSource(organizationId, projectId);
   const { classifications } = useClassifications();
@@ -17,7 +18,7 @@ export function SourceUploadZone({ organizationId, projectId }: SourceUploadZone
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // La clasificación es obligatoria antes de subir.
+  // A classification is required before uploading.
   const selectedCode = classificationCode || classifications[0]?.code || '';
 
   const handleFiles = (files: FileList | null) => {

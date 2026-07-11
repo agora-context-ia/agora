@@ -3,6 +3,7 @@ import { useAuthStore } from '@/features/auth/application/use-auth';
 import { ApiError } from '@/lib/api';
 import { settingsApiAdapter } from '../infra/http-settings-api.adapter';
 
+/** Saves profile changes and refreshes the auth store user. */
 export function useUpdateProfile() {
   const setUser = useAuthStore((state) => state.setUser);
   const [isSaving, setIsSaving] = useState(false);

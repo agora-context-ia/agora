@@ -1,6 +1,8 @@
-// Los use-cases de documentos validan que el espacio pertenezca a la
-// organización de la URL antes de tocar nada (404 si no).
+/**
+ * Document use cases validate that the space belongs to the URL's
+ * organization before touching anything (404 otherwise).
+ */
 export interface SpaceAccessPort {
-  /** Devuelve el organizationId dueño del espacio, o null si no existe. */
+  /** Returns the owning organization id, or null when the space does not exist. */
   findSpaceOrganization(spaceId: string): Promise<string | null>;
 }

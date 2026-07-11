@@ -4,9 +4,9 @@ import { useActiveOrganization } from '@/features/organizations/application/use-
 import { settingsApiAdapter } from '../infra/http-settings-api.adapter';
 import type { AiProviderSetting } from '../domain/settings';
 
-// Estado compartido entre la sección de Settings y el ModelSelector del
-// chat: una sola carga por organización activa, y el guardado de una key
-// refresca a todos los consumidores.
+// State shared between the Settings section and the chat ModelSelector:
+// one load per active organization, and saving a key refreshes every
+// consumer.
 interface AiSettingsStoreState {
   organizationId: string | null;
   providers: AiProviderSetting[];
@@ -15,6 +15,7 @@ interface AiSettingsStoreState {
   load: (organizationId: string) => Promise<void>;
 }
 
+/** Store holding the AI provider settings of the active organization. */
 export const useAiSettingsStore = create<AiSettingsStoreState>((set, get) => ({
   organizationId: null,
   providers: [],
@@ -24,7 +25,7 @@ export const useAiSettingsStore = create<AiSettingsStoreState>((set, get) => ({
     set({ organizationId, isLoading: true, hasLoaded: false });
     try {
       const providers = await settingsApiAdapter.listAiProviders(organizationId);
-      // La organización activa pudo cambiar mientras cargaba: se descarta.
+      // The active organization may have changed while loading: discard.
       if (get().organizationId !== organizationId) return;
       set({ providers, isLoading: false, hasLoaded: true });
     } catch {
@@ -34,6 +35,7 @@ export const useAiSettingsStore = create<AiSettingsStoreState>((set, get) => ({
   },
 }));
 
+/** Loads (once per org) and saves AI provider settings; exposes role-based canEdit. */
 export function useAiProviderSettings() {
   const activeOrganization = useActiveOrganization();
   const organizationId = useAiSettingsStore((state) => state.organizationId);
@@ -48,7 +50,7 @@ export function useAiProviderSettings() {
     void load(activeOrganization.id);
   }, [activeOrganization, organizationId, load]);
 
-  // Solo owner/admin de la organización activa pueden cargar/editar keys.
+  // Only the active organization's owner/admin may create/edit keys.
   const canEdit =
     activeOrganization?.role === 'owner' || activeOrganization?.role === 'admin';
 

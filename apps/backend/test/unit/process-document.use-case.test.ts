@@ -8,6 +8,7 @@ import {
   FakeFileStorage,
   FakeNotifier,
   FakeSpaceAccess,
+  FakeTextExtraction,
 } from './fakes/fake-document-module';
 
 function buildUseCase() {
@@ -22,6 +23,7 @@ function buildUseCase() {
     provider,
     new FakeSpaceAccess({ 'space-1': 'org-1' }),
     storage,
+    new FakeTextExtraction(),
     notifier,
   );
   return { useCase, documents, embeddings, provider, storage, notifier };

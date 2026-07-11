@@ -45,4 +45,5 @@ class HttpChatApiAdapter implements ChatApiPort {
   }
 }
 
+/** HTTP implementation of the chat API port. */
 export const chatApiAdapter = new HttpChatApiAdapter();

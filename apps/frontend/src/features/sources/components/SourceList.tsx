@@ -7,6 +7,7 @@ interface SourceListProps {
   sources: Source[];
 }
 
+/** List of the project's sources. */
 export function SourceList({ organizationId, projectId, sources }: SourceListProps) {
   return (
     <div className="flex flex-col gap-2">

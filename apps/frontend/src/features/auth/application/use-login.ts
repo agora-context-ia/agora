@@ -3,6 +3,7 @@ import { AuthApiError, authApiAdapter } from '../infra/http-auth-api.adapter';
 import type { LoginInput } from '../ports/auth-api.port';
 import { useAuthStore } from './use-auth';
 
+/** Submits login credentials and stores the session user. */
 export function useLogin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

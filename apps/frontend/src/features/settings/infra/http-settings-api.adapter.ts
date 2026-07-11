@@ -49,4 +49,5 @@ class HttpSettingsApiAdapter implements SettingsApiPort {
   }
 }
 
+/** HTTP implementation of the settings API port. */
 export const settingsApiAdapter = new HttpSettingsApiAdapter();

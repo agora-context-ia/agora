@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { CatalogItemDto } from '@contexthub-ai/shared-types';
 import { apiFetch } from '@/lib/api';
 
-// Cache a nivel módulo: el catálogo es estable durante la sesión.
+// Module-level cache: the catalog is stable for the session.
 let cachedItems: CatalogItemDto[] | null = null;
 let pendingRequest: Promise<CatalogItemDto[]> | null = null;
 
@@ -18,7 +18,7 @@ function fetchClassifications(): Promise<CatalogItemDto[]> {
   return pendingRequest;
 }
 
-/** Ítems del catálogo DOCUMENT_CLASSIFICATION para el select de subida. */
+/** DOCUMENT_CLASSIFICATION catalog items for the upload select. */
 export function useClassifications() {
   const [classifications, setClassifications] = useState<CatalogItemDto[]>(cachedItems ?? []);
 
@@ -29,8 +29,8 @@ export function useClassifications() {
         if (!cancelled) setClassifications(items);
       })
       .catch(() => {
-        // sin catálogo no se puede clasificar: el select queda vacío y el
-        // botón de subir deshabilitado
+        // without the catalog nothing can be classified: the select stays
+        // empty and the upload button disabled
       });
     return () => {
       cancelled = true;

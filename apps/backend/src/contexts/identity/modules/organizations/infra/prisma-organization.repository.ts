@@ -9,6 +9,7 @@ import type {
   OrganizationRepositoryPort,
 } from '../ports/organization-repository.port';
 
+/** Prisma-backed organization store; creation registers the owner membership atomically. */
 export class PrismaOrganizationRepository implements OrganizationRepositoryPort {
   async createWithOwner(data: CreateOrganizationData): Promise<OrganizationWithRole> {
     try {
@@ -34,7 +35,7 @@ export class PrismaOrganizationRepository implements OrganizationRepositoryPort 
         role: 'owner',
       };
     } catch (error) {
-      // P2002: unique violation (slug) — carrera entre slugExists y create.
+      // P2002: unique violation (slug) — race between slugExists and create.
       if (isUniqueViolation(error)) throw new OrganizationSlugTakenError(data.slug);
       throw error;
     }
@@ -69,6 +70,7 @@ export class PrismaOrganizationRepository implements OrganizationRepositoryPort 
   }
 }
 
+/** Detects Prisma's P2002 unique-constraint violation without importing Prisma error types. */
 function isUniqueViolation(error: unknown): boolean {
   return (
     typeof error === 'object' &&

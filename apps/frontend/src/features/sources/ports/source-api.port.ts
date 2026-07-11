@@ -8,7 +8,7 @@ import type { Source } from '../domain/source';
 export interface SourceApiPort {
   list(organizationId: string, projectId: string): Promise<Source[]>;
 
-  /** Sube el archivo con su clasificación (code del catálogo DOCUMENT_CLASSIFICATION). */
+  /** Uploads the file with its classification (DOCUMENT_CLASSIFICATION catalog code). */
   upload(
     organizationId: string,
     projectId: string,

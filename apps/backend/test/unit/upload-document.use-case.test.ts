@@ -13,6 +13,7 @@ import {
   FakeMembership,
   FakeQueue,
   FakeSpaceAccess,
+  FakeTextExtraction,
 } from './fakes/fake-document-module';
 
 function buildUseCase(overrides?: { membership?: FakeMembership }) {
@@ -24,6 +25,7 @@ function buildUseCase(overrides?: { membership?: FakeMembership }) {
     overrides?.membership ?? new FakeMembership([['user-1', 'org-1']]),
     new FakeSpaceAccess({ 'space-1': 'org-1', 'space-otro': 'org-2' }),
     new FakeClassificationLookup([{ id: 'item-1', code: 'CONTRACT', name: 'Contrato' }]),
+    new FakeTextExtraction(),
     storage,
     queue,
   );

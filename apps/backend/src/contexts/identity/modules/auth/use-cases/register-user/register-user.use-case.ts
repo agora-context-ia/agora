@@ -8,6 +8,7 @@ import type { PasswordHasherPort } from '../../ports/password-hasher.port';
 import type { SessionRepositoryPort } from '../../ports/session-repository.port';
 import type { UserRepositoryPort } from '../../ports/user-repository.port';
 
+/** Registration form data; the email must not have an account yet. */
 export interface RegisterUserInput {
   fullName: string;
   email: string;
@@ -16,12 +17,14 @@ export interface RegisterUserInput {
   userAgent?: string;
 }
 
+/** Authenticated user plus the session token/expiry to set as cookie. */
 export interface AuthSessionResult {
   user: AuthUser;
   sessionToken: string;
   expiresAt: Date;
 }
 
+/** Creates the account (hashing the password) and opens the first session. */
 export class RegisterUserUseCase {
   constructor(
     private readonly users: UserRepositoryPort,

@@ -13,8 +13,8 @@ import { requireAuth } from '../require-auth';
 
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 
-// memoryStorage: el archivo pasa por el use-case (que decide path y lo
-// persiste); el límite de tamaño lo corta multer antes.
+// memoryStorage: the file goes through the use case (which decides the
+// path and persists it); multer enforces the size limit first.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE_BYTES },
@@ -61,7 +61,7 @@ documentsRouter.post('/', (req: Request, res: Response) => {
           userId: req.userId!,
           organizationId: orgId,
           spaceId,
-          // multer decodifica el nombre como latin1: restaurar UTF-8 (tildes).
+          // multer decodes the name as latin1: restore UTF-8 (accents).
           fileName: Buffer.from(file.originalname, 'latin1').toString('utf-8'),
           mimeType: file.mimetype,
           fileSizeBytes: file.size,

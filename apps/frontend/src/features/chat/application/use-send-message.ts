@@ -5,6 +5,7 @@ import type { ChatMode } from '../domain/mode';
 import type { Message } from '../domain/message';
 import { useChatStore } from './use-conversation';
 
+/** Sends a question and appends the assistant reply (or a local error message). */
 export function useSendMessage(organizationId: string | null, projectId: string | null) {
   const appendMessage = useChatStore((state) => state.appendMessage);
   const setSending = useChatStore((state) => state.setSending);
@@ -34,8 +35,8 @@ export function useSendMessage(organizationId: string | null, projectId: string 
         );
         appendMessage(projectId, reply);
       } catch (error) {
-        // El error se muestra como respuesta del asistente para no perder
-        // el hilo de la conversación (no se persiste: es solo local).
+        // The error is shown as an assistant reply so the conversation
+        // thread is not lost (not persisted: local only).
         appendMessage(projectId, {
           id: `local-error-${Date.now()}`,
           role: 'assistant',

@@ -1,21 +1,22 @@
 import { ArrowLeft, FolderOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useOrganizationStore } from '@/features/organizations/application/use-active-organization';
+import { useActiveOrganizationId } from '@/features/organizations/application/use-active-organization';
 import { useOrganizationList } from '@/features/organizations/application/use-organization-list';
 import { useProjectList } from '@/features/projects/application/use-project-list';
 import { useSources } from '../application/use-sources';
 import { SourceList } from './SourceList';
 import { SourceUploadZone } from './SourceUploadZone';
 
+/** Full page listing and managing the documents of a project. */
 export function SourcesPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  // Se llaman acá también (no solo en el shell) porque se puede entrar
-  // directo a esta URL sin pasar por "/": cargan orgs (y fijan la activa)
-  // y los proyectos de esa organización.
+  // Called here too (not only in the shell) because this URL can be
+  // opened directly without visiting "/": they load the orgs (setting
+  // the active one) and that organization's projects.
   useOrganizationList();
-  const activeOrganizationId = useOrganizationStore((state) => state.activeOrganizationId);
+  const activeOrganizationId = useActiveOrganizationId();
   const { projects } = useProjectList();
   const project = projects.find((item) => item.id === projectId);
   const { sources, isLoading } = useSources(activeOrganizationId, projectId ?? null);

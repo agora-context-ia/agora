@@ -1,5 +1,7 @@
-import type { AiProvider, ProviderCredentialSummary } from '../domain/ai-provider-credential';
+import type { AiProvider } from '../../../../../shared/ai-provider-catalog';
+import type { ProviderCredentialSummary } from '../domain/ai-provider-credential';
 
+/** Payload to create or replace an organization's provider credential. */
 export interface UpsertCredentialData {
   organizationId: string;
   provider: AiProvider;
@@ -8,10 +10,13 @@ export interface UpsertCredentialData {
   createdBy: string;
 }
 
+/** Persistence contract for encrypted AI provider credentials. */
 export interface AiCredentialRepositoryPort {
   upsert(data: UpsertCredentialData): Promise<ProviderCredentialSummary>;
   listByOrganization(organizationId: string): Promise<ProviderCredentialSummary[]>;
-  // Solo para uso server-side (futuro adapter de LLM). La key descifrada
-  // jamás debe pasar por una ruta HTTP.
+  /**
+   * Server-side only (LLM adapters). The decrypted key must never pass
+   * through an HTTP route.
+   */
   findEncryptedKey(organizationId: string, provider: AiProvider): Promise<string | null>;
 }

@@ -3,6 +3,7 @@ import { AuthApiError, authApiAdapter } from '../infra/http-auth-api.adapter';
 import type { RegisterInput } from '../ports/auth-api.port';
 import { useAuthStore } from './use-auth';
 
+/** Submits the registration form and stores the session user. */
 export function useRegister() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

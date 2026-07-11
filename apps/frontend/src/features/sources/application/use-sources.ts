@@ -55,9 +55,9 @@ export const useSourceStore = create<SourceStoreState>((set, get) => ({
 }));
 
 /**
- * Fuentes del proyecto activo. Sin polling: al recibir el evento SSE
- * document.updated del espacio se refetchea la lista (y también tras una
- * reconexión del canal, por si se perdió un evento).
+ * Sources of the active project. No polling: the list refetches when the
+ * space's document.updated SSE event arrives (and also after a channel
+ * reconnection, in case an event was missed).
  */
 export function useSources(organizationId: string | null, projectId: string | null) {
   const sourcesByProject = useSourceStore((state) => state.sourcesByProject);

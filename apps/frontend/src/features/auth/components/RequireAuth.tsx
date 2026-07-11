@@ -1,8 +1,10 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useCurrentUser } from '../application/use-current-user';
 
-// Guard de rutas privadas: consulta la sesión (cookie httpOnly) contra el
-// backend la primera vez y redirige a /login si no hay usuario.
+/**
+ * Private-route guard: checks the session (httpOnly cookie) against the
+ * backend on first load and redirects to /login when there is no user.
+ */
 export function RequireAuth() {
   const { user, hasLoaded } = useCurrentUser();
 

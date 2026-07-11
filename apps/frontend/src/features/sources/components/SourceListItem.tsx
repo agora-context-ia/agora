@@ -21,7 +21,7 @@ const STATUS_LABEL: Record<SourceStatus, string> = {
   error: 'Error',
 };
 
-// Mapeo semántico: verde = éxito, acento = en curso, rojo = error, gris = en cola.
+// Semantic mapping: green = success, accent = in progress, red = error, gray = queued.
 const STATUS_VARIANT: Record<SourceStatus, BadgeProps['variant']> = {
   pending: 'muted',
   processing: 'info',
@@ -35,6 +35,7 @@ interface SourceListItemProps {
   source: Source;
 }
 
+/** Row for one source: icon, name, status badge and actions. */
 export function SourceListItem({ organizationId, projectId, source }: SourceListItemProps) {
   const { deleteSource, deletingId } = useDeleteSource(organizationId, projectId);
   const { reprocessSource, reprocessingId } = useReprocessSource(organizationId, projectId);

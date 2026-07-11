@@ -6,7 +6,9 @@ import {
   UnknownChatModelError,
   type ChatMessage,
   type ChatRole,
+  type ChatSource,
 } from '../../src/contexts/ai/modules/chat/domain/chat';
+import type { ContextSearchPort } from '../../src/contexts/ai/modules/chat/ports/context-search.port';
 import type {
   AppendMessageData,
   ConversationRepositoryPort,
@@ -18,11 +20,6 @@ import type {
   LlmProviderPort,
 } from '../../src/contexts/ai/modules/chat/ports/llm-provider.port';
 import { SendChatMessageUseCase } from '../../src/contexts/ai/modules/chat/use-cases/send-chat-message/send-chat-message.use-case';
-import type { EmbeddingProviderPort } from '../../src/contexts/knowledge-management/modules/documents/ports/embedding-provider.port';
-import type {
-  EmbeddingRepositoryPort,
-  SemanticSearchHit,
-} from '../../src/contexts/knowledge-management/modules/documents/ports/embedding-repository.port';
 
 class FakeMembership {
   members = new Set<string>();
@@ -89,23 +86,13 @@ class FakeLlm implements LlmProviderPort {
   }
 }
 
-class FakeEmbeddingProvider implements EmbeddingProviderPort {
-  readonly modelName = 'fake-embed';
-  readonly dimensions = 3;
+class FakeContextSearch implements ContextSearchPort {
+  results: ChatSource[] = [];
   shouldFail = false;
 
-  async embedBatch(texts: string[]): Promise<number[][]> {
-    if (this.shouldFail) throw new Error('proveedor de embeddings caído');
-    return texts.map(() => [0.1, 0.2, 0.3]);
-  }
-}
-
-class FakeEmbeddingRepository implements EmbeddingRepositoryPort {
-  hits: SemanticSearchHit[] = [];
-  async replaceForSource(): Promise<void> {}
-  async deleteForSource(): Promise<void> {}
-  async search(): Promise<SemanticSearchHit[]> {
-    return this.hits;
+  async search(): Promise<ChatSource[]> {
+    if (this.shouldFail) throw new Error('retrieval provider down');
+    return this.results;
   }
 }
 
@@ -115,8 +102,7 @@ function setup() {
   const conversations = new FakeConversationRepository();
   const credentials = new FakeLlmCredentials();
   const llm = new FakeLlm();
-  const embeddingProvider = new FakeEmbeddingProvider();
-  const embeddings = new FakeEmbeddingRepository();
+  const contextSearch = new FakeContextSearch();
 
   membership.members.add('user-1:org-1');
   spaceAccess.spaces.set('space-1', 'org-1');
@@ -128,11 +114,10 @@ function setup() {
     conversations,
     credentials,
     llm,
-    embeddingProvider,
-    embeddings,
+    contextSearch,
   );
 
-  return { membership, spaceAccess, conversations, credentials, llm, embeddingProvider, embeddings, useCase };
+  return { membership, spaceAccess, conversations, credentials, llm, contextSearch, useCase };
 }
 
 const BASE_INPUT = {
@@ -145,7 +130,7 @@ const BASE_INPUT = {
 };
 
 describe('SendChatMessageUseCase', () => {
-  it('responde usando el modelo elegido y persiste pregunta y respuesta', async () => {
+  it('answers with the chosen model and persists both question and answer', async () => {
     const { useCase, llm, conversations } = setup();
 
     const result = await useCase.execute(BASE_INPUT);
@@ -154,14 +139,14 @@ describe('SendChatMessageUseCase', () => {
     expect(result.message.content).toBe('Respuesta del modelo');
     expect(llm.lastInput?.model).toBe('gemini-flash-latest');
     expect(llm.lastInput?.apiKey).toBe('una-api-key');
-    // user + assistant persistidos, con modelo y tokens en el del asistente.
+    // user + assistant persisted, with model and tokens on the assistant one.
     expect(conversations.messages.map((m) => m.role)).toEqual(['user', 'assistant']);
     expect(conversations.messages[1].modelName).toBe('gemini-flash-latest');
     expect(conversations.messages[1].tokensInput).toBe(10);
     expect(conversations.messages[1].tokensOutput).toBe(20);
   });
 
-  it('arma el system prompt con la plantilla del modo elegido', async () => {
+  it('builds the system prompt from the chosen mode template', async () => {
     const { useCase, llm } = setup();
 
     await useCase.execute({ ...BASE_INPUT, mode: 'acceptance-criteria' });
@@ -171,15 +156,13 @@ describe('SendChatMessageUseCase', () => {
     expect(llm.lastInput?.systemPrompt).toContain('ContextHub AI');
   });
 
-  it('inyecta los fragmentos recuperados como contexto y los devuelve como fuentes', async () => {
-    const { useCase, llm, embeddings } = setup();
-    embeddings.hits = [
+  it('injects retrieved fragments as context and returns them as sources', async () => {
+    const { useCase, llm, contextSearch } = setup();
+    contextSearch.results = [
       {
-        documentId: 'doc-1',
-        fileName: 'Manual.pdf',
-        chunkIndex: 0,
-        content: 'El alta de usuarios requiere aprobación del supervisor.',
-        score: 0.91,
+        documentName: 'Manual.pdf',
+        fragment: 'El alta de usuarios requiere aprobación del supervisor.',
+        relevance: 0.91,
       },
     ];
 
@@ -191,19 +174,19 @@ describe('SendChatMessageUseCase', () => {
     expect(result.sources[0]).toMatchObject({ documentName: 'Manual.pdf', relevance: 0.91 });
   });
 
-  it('deduplica las fuentes por documento aunque haya varios fragmentos del mismo', async () => {
-    const { useCase, llm, embeddings } = setup();
-    embeddings.hits = [
-      { documentId: 'doc-1', fileName: 'Manual.pdf', chunkIndex: 0, content: 'Fragmento A', score: 0.9 },
-      { documentId: 'doc-1', fileName: 'Manual.pdf', chunkIndex: 3, content: 'Fragmento B', score: 0.8 },
-      { documentId: 'doc-2', fileName: 'Anexo.pdf', chunkIndex: 1, content: 'Fragmento C', score: 0.7 },
-      { documentId: 'doc-1', fileName: 'Manual.pdf', chunkIndex: 7, content: 'Fragmento D', score: 0.6 },
+  it('dedupes sources by document even when several fragments share one', async () => {
+    const { useCase, llm, contextSearch } = setup();
+    contextSearch.results = [
+      { documentName: 'Manual.pdf', fragment: 'Fragmento A', relevance: 0.9 },
+      { documentName: 'Manual.pdf', fragment: 'Fragmento B', relevance: 0.8 },
+      { documentName: 'Anexo.pdf', fragment: 'Fragmento C', relevance: 0.7 },
+      { documentName: 'Manual.pdf', fragment: 'Fragmento D', relevance: 0.6 },
     ];
 
     const result = await useCase.execute(BASE_INPUT);
 
-    // Al prompt van los 4 fragmentos; como fuentes, uno por documento con
-    // el fragmento de mayor relevancia.
+    // All 4 fragments reach the prompt; sources contain one entry per
+    // document with its most relevant fragment.
     expect(llm.lastInput?.systemPrompt).toContain('Fragmento B');
     expect(llm.lastInput?.systemPrompt).toContain('Fragmento D');
     expect(result.sources).toHaveLength(2);
@@ -211,9 +194,9 @@ describe('SendChatMessageUseCase', () => {
     expect(result.sources[1]).toMatchObject({ documentName: 'Anexo.pdf', relevance: 0.7 });
   });
 
-  it('sigue funcionando sin contexto si el proveedor de embeddings falla', async () => {
-    const { useCase, embeddingProvider } = setup();
-    embeddingProvider.shouldFail = true;
+  it('still works without context when retrieval fails', async () => {
+    const { useCase, contextSearch } = setup();
+    contextSearch.shouldFail = true;
 
     const result = await useCase.execute(BASE_INPUT);
 
@@ -221,7 +204,7 @@ describe('SendChatMessageUseCase', () => {
     expect(result.sources).toEqual([]);
   });
 
-  it('falla con AiProviderNotConfiguredError si la org no tiene key ni hay fallback', async () => {
+  it('fails with AiProviderNotConfiguredError when the org has no key and no fallback', async () => {
     const { useCase, credentials, conversations } = setup();
     credentials.keys.clear();
 
@@ -229,7 +212,7 @@ describe('SendChatMessageUseCase', () => {
     expect(conversations.messages).toHaveLength(0);
   });
 
-  it('rechaza a un no-miembro y a un espacio de otra organización', async () => {
+  it('rejects a non-member and a space from another organization', async () => {
     const { useCase, spaceAccess } = setup();
 
     await expect(useCase.execute({ ...BASE_INPUT, userId: 'intruso' })).rejects.toBeInstanceOf(
@@ -242,7 +225,7 @@ describe('SendChatMessageUseCase', () => {
     );
   });
 
-  it('rechaza un modelo fuera del catálogo y usa el default si no viene modelo', async () => {
+  it('rejects a model outside the catalog and defaults when no model is given', async () => {
     const { useCase, llm } = setup();
 
     await expect(
@@ -253,7 +236,7 @@ describe('SendChatMessageUseCase', () => {
     expect(llm.lastInput?.model).toBe('gemini-flash-latest');
   });
 
-  it('cae al modo general si llega un modo desconocido', async () => {
+  it('falls back to general mode when an unknown mode arrives', async () => {
     const { useCase, llm } = setup();
 
     await useCase.execute({ ...BASE_INPUT, mode: 'modo-inexistente' });

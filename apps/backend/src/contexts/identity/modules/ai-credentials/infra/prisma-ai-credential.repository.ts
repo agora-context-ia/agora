@@ -1,10 +1,12 @@
 import { prisma } from '../../../../../infrastructure/persistence/prisma-client';
-import type { AiProvider, ProviderCredentialSummary } from '../domain/ai-provider-credential';
+import type { AiProvider } from '../../../../../shared/ai-provider-catalog';
+import type { ProviderCredentialSummary } from '../domain/ai-provider-credential';
 import type {
   AiCredentialRepositoryPort,
   UpsertCredentialData,
 } from '../ports/ai-credential-repository.port';
 
+/** Prisma-backed store for encrypted AI provider credentials (one per org+provider). */
 export class PrismaAiCredentialRepository implements AiCredentialRepositoryPort {
   async upsert(data: UpsertCredentialData): Promise<ProviderCredentialSummary> {
     const row = await prisma.aiProviderCredential.upsert({
@@ -21,8 +23,8 @@ export class PrismaAiCredentialRepository implements AiCredentialRepositoryPort 
         apiKeyLastFour: data.apiKeyLastFour,
         createdBy: data.createdBy,
       },
-      // Reemplazo de key: createdBy pasa a ser el último admin que la
-      // cargó, y se revive si estaba soft-deleteada.
+      // Key replacement: createdBy becomes the last admin who stored it,
+      // and a soft-deleted credential is revived.
       update: {
         apiKeyEncrypted: data.apiKeyEncrypted,
         apiKeyLastFour: data.apiKeyLastFour,

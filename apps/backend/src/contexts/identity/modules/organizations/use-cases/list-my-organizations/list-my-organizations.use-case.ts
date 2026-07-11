@@ -1,8 +1,10 @@
 import type { OrganizationWithRole } from '../../domain/organization';
 import type { OrganizationRepositoryPort } from '../../ports/organization-repository.port';
 
-// Devuelve únicamente las organizaciones donde el usuario es member
-// activo — nunca todas las de la tabla.
+/**
+ * Returns only the organizations where the user is an active member —
+ * never the whole table.
+ */
 export class ListMyOrganizationsUseCase {
   constructor(private readonly organizations: OrganizationRepositoryPort) {}
 

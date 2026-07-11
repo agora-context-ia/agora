@@ -7,9 +7,10 @@ interface GeminiBatchEmbedResponse {
   embeddings: Array<{ values: number[] }>;
 }
 
-// Límite documentado de batchEmbedContents.
+// Documented limit of batchEmbedContents.
 const BATCH_SIZE = 100;
 
+/** Embeddings adapter for the Google AI Studio batchEmbedContents API. */
 export class GeminiEmbeddingAdapter implements EmbeddingProviderPort {
   constructor(
     private readonly apiKey: string,
@@ -32,8 +33,8 @@ export class GeminiEmbeddingAdapter implements EmbeddingProviderPort {
           requests: batch.map((text) => ({
             model: `models/${this.modelName}`,
             content: { parts: [{ text }] },
-            // Modelos Matryoshka (gemini-embedding-001: 3072 nativo) se
-            // truncan a 768 acá; text-embedding-004 ya es 768 nativo.
+            // Matryoshka models (gemini-embedding-001: 3072 native) get
+            // truncated to 768 here; text-embedding-004 is 768 natively.
             outputDimensionality: this.dimensions,
           })),
         }),
@@ -51,9 +52,9 @@ export class GeminiEmbeddingAdapter implements EmbeddingProviderPort {
             this.modelName,
           );
         }
-        // Los vectores truncados por Matryoshka pierden norma 1: se
-        // renormaliza L2 siempre (es no-op si ya venía normalizado) para
-        // que la distancia coseno de pgvector sea consistente.
+        // Matryoshka-truncated vectors lose unit norm: always L2-renormalize
+        // (a no-op if already normalized) so pgvector cosine distance stays
+        // consistent.
         vectors.push(normalizeL2(item.values));
       }
     }

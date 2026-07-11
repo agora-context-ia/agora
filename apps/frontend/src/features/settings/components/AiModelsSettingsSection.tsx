@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/api';
 import { useAiProviderSettings } from '../application/use-ai-provider-settings';
 import type { AiProviderSetting } from '../domain/settings';
 
+/** AI Models section of Settings: per-provider API key management. */
 export function AiModelsSettingsSection() {
   const { providers, isLoading, canEdit, saveApiKey } = useAiProviderSettings();
 

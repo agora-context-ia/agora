@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useAuthStore } from '../application/use-auth';
 import { useLogin } from '../application/use-login';
 
+/** Login page. */
 export function LoginPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();

@@ -9,6 +9,7 @@ interface MessageBubbleProps {
   message: Message;
 }
 
+/** One message: assistant replies render as Markdown, user text as plain. */
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isAssistant = message.role === 'assistant';
 

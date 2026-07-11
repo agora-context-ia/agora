@@ -15,8 +15,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { ApiError } from '@/lib/api';
 import { projectApiAdapter } from '../infra/http-project-api.adapter';
 import { useProjectStore } from '../application/use-active-project';
-import { useOrganizationStore } from '@/features/organizations/application/use-active-organization';
+import { useActiveOrganizationId } from '@/features/organizations/application/use-active-organization';
 
+/** Modal form to create a project in the active organization. */
 export function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -24,7 +25,7 @@ export function CreateProjectDialog() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const addProject = useProjectStore((state) => state.addProject);
-  const activeOrganizationId = useOrganizationStore((state) => state.activeOrganizationId);
+  const activeOrganizationId = useActiveOrganizationId();
 
   const handleSubmit = async () => {
     if (!name.trim() || !activeOrganizationId) return;

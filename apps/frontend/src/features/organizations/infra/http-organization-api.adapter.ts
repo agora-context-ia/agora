@@ -22,4 +22,5 @@ class HttpOrganizationApiAdapter implements OrganizationApiPort {
   }
 }
 
+/** HTTP implementation of the organization API port. */
 export const organizationApiAdapter = new HttpOrganizationApiAdapter();

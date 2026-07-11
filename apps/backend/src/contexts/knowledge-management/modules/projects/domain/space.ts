@@ -1,3 +1,4 @@
+/** A knowledge space ("project" in the UI) inside an organization. */
 export interface Space {
   id: string;
   organizationId: string;
@@ -9,6 +10,7 @@ export interface Space {
   updatedAt: Date;
 }
 
+/** Thrown when the requesting user does not belong to the organization. */
 export class NotOrganizationMemberError extends Error {
   constructor() {
     super('No sos miembro de esta organización');
@@ -16,6 +18,7 @@ export class NotOrganizationMemberError extends Error {
   }
 }
 
+/** Thrown when the space slug already exists within the organization. */
 export class SpaceSlugTakenError extends Error {
   constructor(slug: string) {
     super(`Ya existe un espacio con el nombre/slug "${slug}" en esta organización`);

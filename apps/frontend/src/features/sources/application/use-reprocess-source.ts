@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { sourceApiAdapter } from '../infra/http-source-api.adapter';
 import { useSourceStore } from './use-sources';
 
+/** Re-enqueues a source for processing (e.g. after an error). */
 export function useReprocessSource(organizationId: string | null, projectId: string | null) {
   const upsertSource = useSourceStore((state) => state.upsertSource);
   const [reprocessingId, setReprocessingId] = useState<string | null>(null);

@@ -1,7 +1,9 @@
-// Chat sobre la documentación de un espacio. El "modo" es el tipo de
-// tarea (consulta general, resumen, etc.) y define la plantilla de
-// instrucciones; el "modelo" es el modelo concreto del proveedor que
-// configuró la organización (ver identity/ai-credentials).
+/**
+ * Chat over a space's documentation. The "mode" is the task type (general
+ * question, summary, etc.) and selects the instruction template; the
+ * "model" is the concrete provider model configured by the organization
+ * (see identity/ai-credentials).
+ */
 
 export const CHAT_MODES = [
   'general',
@@ -15,18 +17,21 @@ export const CHAT_MODES = [
 
 export type ChatMode = (typeof CHAT_MODES)[number];
 
+/** Type guard narrowing an arbitrary string to a supported {@link ChatMode}. */
 export function isChatMode(value: string): value is ChatMode {
   return (CHAT_MODES as readonly string[]).includes(value);
 }
 
 export type ChatRole = 'user' | 'assistant';
 
+/** A documentation fragment that grounded an answer, as shown to the user. */
 export interface ChatSource {
   documentName: string;
   fragment: string;
   relevance: number;
 }
 
+/** A persisted chat message within a conversation. */
 export interface ChatMessage {
   id: string;
   role: ChatRole;
@@ -34,6 +39,7 @@ export interface ChatMessage {
   createdAt: Date;
 }
 
+/** Thrown when the requesting user does not belong to the organization. */
 export class NotOrganizationMemberError extends Error {
   constructor() {
     super('No sos miembro de esta organización');
@@ -41,6 +47,7 @@ export class NotOrganizationMemberError extends Error {
   }
 }
 
+/** Thrown when the space does not exist or belongs to another organization. */
 export class SpaceNotFoundInOrganizationError extends Error {
   constructor() {
     super('El espacio no existe en esta organización');
@@ -48,6 +55,7 @@ export class SpaceNotFoundInOrganizationError extends Error {
   }
 }
 
+/** Thrown when neither the organization nor the environment provides an API key. */
 export class AiProviderNotConfiguredError extends Error {
   constructor() {
     super(
@@ -57,6 +65,7 @@ export class AiProviderNotConfiguredError extends Error {
   }
 }
 
+/** Thrown when the requested model is not part of the provider catalog. */
 export class UnknownChatModelError extends Error {
   constructor(model: string) {
     super(`Modelo de IA desconocido: ${model}`);
@@ -64,6 +73,7 @@ export class UnknownChatModelError extends Error {
   }
 }
 
+/** Thrown when the LLM provider returns an error response. */
 export class LlmRequestFailedError extends Error {
   constructor(detail: string) {
     super(`El proveedor de IA respondió con un error: ${detail}`);

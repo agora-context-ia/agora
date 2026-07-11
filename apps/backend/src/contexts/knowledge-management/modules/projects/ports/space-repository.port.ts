@@ -1,5 +1,6 @@
 import type { Space } from '../domain/space';
 
+/** Data to persist a new space. */
 export interface CreateSpaceData {
   organizationId: string;
   createdBy: string;
@@ -8,9 +9,10 @@ export interface CreateSpaceData {
   description: string | null;
 }
 
+/** Persistence contract for spaces. */
 export interface SpaceRepositoryPort {
   listByOrganization(organizationId: string): Promise<Space[]>;
-  // Lanza SpaceSlugTakenError si el slug ya existe en la organización.
+  /** @throws SpaceSlugTakenError when the slug already exists in the organization. */
   create(data: CreateSpaceData): Promise<Space>;
   slugExists(organizationId: string, slug: string): Promise<boolean>;
 }

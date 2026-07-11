@@ -17,6 +17,7 @@ const withDocumentCount = {
   _count: { select: { contextDocuments: { where: { deletedAt: null } } } },
 } as const;
 
+/** Prisma-backed space store (soft-delete aware, slug-unique per org). */
 export class PrismaSpaceRepository implements SpaceRepositoryPort {
   async listByOrganization(organizationId: string): Promise<Space[]> {
     const spaces = await prisma.space.findMany({
@@ -41,7 +42,7 @@ export class PrismaSpaceRepository implements SpaceRepositoryPort {
       });
       return toSpace(space);
     } catch (error) {
-      // P2002: violación de uq_spaces_org_slug (carrera entre check y create).
+      // P2002: uq_spaces_org_slug violation (race between check and create).
       if (isUniqueViolation(error)) throw new SpaceSlugTakenError(data.slug);
       throw error;
     }

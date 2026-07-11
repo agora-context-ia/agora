@@ -1,8 +1,13 @@
 import type { ChatMode, ChatSource } from './chat';
 
-// Plantillas de instrucciones por tipo de acción del chat. Hardcodeadas
-// por ahora (misma decisión que el catálogo de modelos): cuando haga
-// falta editarlas desde la UI pasan a la tabla ai.prompt_templates.
+/**
+ * Instruction templates per chat action type. Hardcoded for now (same
+ * decision as the model catalog): once they need UI editing they move to
+ * the ai.prompt_templates table.
+ *
+ * The template text itself is Spanish on purpose — it instructs the LLM
+ * to answer in the product language.
+ */
 
 const BASE_PROMPT = `Sos el asistente de ContextHub AI, una plataforma donde los equipos suben la documentación de sus proyectos y hacen preguntas sobre ella.
 
@@ -36,6 +41,11 @@ Compará los fragmentos de documentación provistos buscando inconsistencias o c
 Generá criterios de aceptación para la historia o funcionalidad que describe el usuario, en formato Given/When/Then (Dado/Cuando/Entonces), consistentes con las reglas documentadas. Marcá los criterios que necesitan validación de negocio por falta de documentación.`,
 };
 
+/**
+ * Builds the system prompt for a chat turn: base rules + mode-specific
+ * instructions + the retrieved documentation context (or an explicit note
+ * when nothing was retrieved, so the model does not hallucinate sources).
+ */
 export function buildSystemPrompt(mode: ChatMode, context: ChatSource[]): string {
   const sections = [BASE_PROMPT, MODE_INSTRUCTIONS[mode]];
 

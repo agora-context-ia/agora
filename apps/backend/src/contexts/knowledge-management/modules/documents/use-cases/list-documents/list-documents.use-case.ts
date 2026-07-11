@@ -7,6 +7,7 @@ import {
 import type { DocumentRepositoryPort } from '../../ports/document-repository.port';
 import type { SpaceAccessPort } from '../../ports/space-access.port';
 
+/** Lists the documents of a space, newest first, after access checks. */
 export class ListDocumentsUseCase {
   constructor(
     private readonly documents: DocumentRepositoryPort,

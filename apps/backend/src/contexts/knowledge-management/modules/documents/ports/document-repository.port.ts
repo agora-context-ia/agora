@@ -11,8 +11,9 @@ export interface CreateDocumentData {
   classificationId: string | null;
 }
 
+/** Persistence contract for context documents and their sources. */
 export interface DocumentRepositoryPort {
-  /** Crea la fuente (type 'file') + el documento en estado pending, en una transacción. */
+  /** Creates the source (type 'file') + the document in pending state, in one transaction. */
   createWithSource(data: CreateDocumentData): Promise<ContextDocumentEntity>;
   updateFilePath(documentId: string, filePath: string): Promise<void>;
   listBySpace(spaceId: string): Promise<ContextDocumentEntity[]>;
@@ -22,6 +23,6 @@ export interface DocumentRepositoryPort {
     processingStatus: DocumentProcessingStatus,
     processingError?: string | null,
   ): Promise<void>;
-  /** Soft delete de documento + fuente (chunks/embeddings se borran vía EmbeddingRepository). */
+  /** Soft-deletes document + source (chunks/embeddings are removed via EmbeddingRepository). */
   softDelete(documentId: string): Promise<void>;
 }

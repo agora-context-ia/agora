@@ -1,12 +1,15 @@
 import { redisConnection, redisSubscriber } from '../redis/redis-clients';
 import { sseRegistry } from './sse-connection-registry';
 
-// Bus de eventos por usuario sobre Redis pub/sub. Cada instancia del backend
-// se suscribe a events:user:* y reenvía a sus sockets SSE locales; publicar
-// funciona igual desde el API o desde el worker.
+/**
+ * Per-user event bus over Redis pub/sub. Every backend instance
+ * subscribes to events:user:* and forwards to its local SSE sockets;
+ * publishing works the same from the API or from the worker.
+ */
 
 const CHANNEL_PREFIX = 'events:user:';
 
+/** Subscribes this instance to user channels and forwards to local SSE sockets. */
 export function startRealtimeEventBus(): void {
   void redisSubscriber.psubscribe(`${CHANNEL_PREFIX}*`);
   redisSubscriber.on('pmessage', (_pattern, channel, message) => {
@@ -17,6 +20,7 @@ export function startRealtimeEventBus(): void {
   });
 }
 
+/** Publishes an event to every instance holding SSE connections for the user. */
 export async function publishToUser(userId: string, event: object): Promise<void> {
   await redisConnection.publish(`${CHANNEL_PREFIX}${userId}`, JSON.stringify(event));
 }

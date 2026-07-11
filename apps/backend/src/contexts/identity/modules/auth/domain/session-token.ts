@@ -1,15 +1,17 @@
 import { createHash, randomBytes } from 'node:crypto';
 
-// Duración de la sesión: 7 días. La cookie y la fila en security.sessions
-// comparten este TTL.
+/** Session duration: 7 days. The cookie and the security.sessions row share this TTL. */
 export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-// Token opaco que viaja en la cookie httpOnly. En la base solo se guarda
-// su hash sha256 (si se filtra la tabla, los tokens no sirven).
+/**
+ * Opaque token that travels in the httpOnly cookie. Only its sha256 hash
+ * is stored in the database (a leaked table yields unusable tokens).
+ */
 export function generateSessionToken(): string {
   return randomBytes(32).toString('base64url');
 }
 
+/** Hashes a session token the way it is stored and looked up in the DB. */
 export function hashSessionToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }

@@ -2,12 +2,15 @@ import { randomUUID } from 'node:crypto';
 import type { Response } from 'express';
 import { redisConnection } from '../redis/redis-clients';
 
-// Registro de conexiones SSE: en memoria (los sockets viven en este proceso)
-// + espejo en Redis (sse:user:{userId}) para saber qué usuarios están
-// conectados y en qué instancia cuando haya más de un backend.
+/**
+ * SSE connection registry: in memory (sockets live in this process) plus
+ * a Redis mirror (sse:user:{userId}) to know which users are connected
+ * and on which instance once there is more than one backend.
+ */
 
-const REGISTRY_TTL_SECONDS = 90; // ~3 heartbeats: si la instancia muere, expira solo
+const REGISTRY_TTL_SECONDS = 90; // ~3 heartbeats: if the instance dies it expires on its own
 
+/** Short id of this backend instance, used to namespace Redis registry entries. */
 export const instanceId = randomUUID().slice(0, 8);
 
 class SseConnectionRegistry {
@@ -40,7 +43,7 @@ class SseConnectionRegistry {
     await redisConnection.srem(`sse:user:${userId}`, `${instanceId}:${connectionId}`);
   }
 
-  /** Reenvía un evento (ya serializado) a las conexiones locales del usuario. */
+  /** Forwards an (already serialized) event to the user's local connections. */
   sendToUser(userId: string, serializedEvent: string): void {
     const connections = this.byUser.get(userId);
     if (!connections) return;
@@ -54,8 +57,10 @@ class SseConnectionRegistry {
   }
 }
 
+/** Process-wide registry of open SSE connections. */
 export const sseRegistry = new SseConnectionRegistry();
 
+/** Generates a unique id for a new SSE connection. */
 export function newConnectionId(): string {
   return randomUUID();
 }

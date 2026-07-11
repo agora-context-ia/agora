@@ -1,7 +1,9 @@
 export type OrganizationRole = 'owner' | 'admin' | 'member';
 
-// Organización vista desde el usuario autenticado: incluye el rol que
-// tiene en ella (viene de organization_members).
+/**
+ * Organization as seen by the authenticated user: includes the role they
+ * hold in it (sourced from organization_members).
+ */
 export interface OrganizationWithRole {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export interface OrganizationWithRole {
   role: OrganizationRole;
 }
 
+/** Thrown when an organization slug is already in use. */
 export class OrganizationSlugTakenError extends Error {
   constructor(slug: string) {
     super(`El slug de organización "${slug}" ya está en uso`);

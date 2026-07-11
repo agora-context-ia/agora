@@ -1,12 +1,17 @@
-import type { AiProvider } from '../../../../identity/modules/ai-credentials/domain/ai-provider-credential';
 import type { AiCredentialRepositoryPort } from '../../../../identity/modules/ai-credentials/ports/ai-credential-repository.port';
 import type { CredentialCipherPort } from '../../../../identity/modules/ai-credentials/ports/credential-cipher.port';
+import type { AiProvider } from '../../../../../shared/ai-provider-catalog';
 import type { LlmCredentialPort } from '../ports/llm-credential.port';
 
-// Resuelve la key del proveedor: primero la de la organización (cifrada
-// en main.ai_provider_credentials), y si no hay, el fallback de
-// desarrollo local (GEMINI_API_KEY del backend). La key descifrada nunca
-// sale de este proceso.
+/**
+ * Anti-corruption adapter resolving the provider API key for an
+ * organization: first the org's own key (encrypted at rest), then the
+ * local-development fallback (e.g. the backend's GEMINI_API_KEY env var).
+ *
+ * Composes identity/ai-credentials ports, which is allowed only here in
+ * `infra/` (see AGENTS.md dependency rules). The decrypted key never
+ * leaves this process.
+ */
 export class OrgCredentialLlmKeyAdapter implements LlmCredentialPort {
   constructor(
     private readonly credentials: AiCredentialRepositoryPort,

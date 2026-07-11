@@ -5,8 +5,8 @@ interface ProjectStoreState {
   projects: Project[];
   activeProjectId: string | null;
   isLoading: boolean;
-  // Organización cuyos proyectos están cargados: cambiar de organización
-  // dispara una recarga (y recalcula el proyecto activo).
+  // Organization whose projects are loaded: switching organizations
+  // triggers a reload (and recalculates the active project).
   loadedOrganizationId: string | null;
   setProjects: (projects: Project[], organizationId: string) => void;
   clearProjects: () => void;
@@ -15,6 +15,7 @@ interface ProjectStoreState {
   addProject: (project: Project) => void;
 }
 
+/** Store holding the loaded projects and the active selection. */
 export const useProjectStore = create<ProjectStoreState>((set) => ({
   projects: [],
   activeProjectId: null,
@@ -24,12 +25,12 @@ export const useProjectStore = create<ProjectStoreState>((set) => ({
     set({
       projects,
       loadedOrganizationId: organizationId,
-      // Al cambiar de organización el proyecto activo anterior ya no
-      // existe en la lista: se selecciona el primero (o ninguno).
+      // After switching organizations the previous active project no
+      // longer exists in the list: select the first one (or none).
       activeProjectId: projects[0]?.id ?? null,
-      // isLoading se apaga acá (de forma atómica con los datos) y no en el
-      // .finally del efecto: al setear loadedOrganizationId el efecto se
-      // re-ejecuta y cancela el closure anterior antes de su .finally.
+      // isLoading turns off here (atomically with the data) and not in
+      // the effect's .finally: setting loadedOrganizationId re-runs the
+      // effect and cancels the previous closure before its .finally.
       isLoading: false,
     }),
   clearProjects: () =>
@@ -43,6 +44,7 @@ export const useProjectStore = create<ProjectStoreState>((set) => ({
     })),
 }));
 
+/** Returns the currently selected project, or null. */
 export function useActiveProject(): Project | null {
   const projects = useProjectStore((state) => state.projects);
   const activeProjectId = useProjectStore((state) => state.activeProjectId);

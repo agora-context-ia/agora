@@ -10,7 +10,7 @@ import {
 import { useLogout } from '@/features/auth/application/use-logout';
 import { CreateOrganizationDialog } from './CreateOrganizationDialog';
 
-// Primer login: el usuario todavía no pertenece a ninguna organización.
+/** First login: the user does not belong to any organization yet. */
 export function OnboardingScreen() {
   const { logout, isLoggingOut } = useLogout();
 

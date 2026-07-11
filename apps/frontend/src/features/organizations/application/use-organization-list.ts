@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { organizationApiAdapter } from '../infra/http-organization-api.adapter';
 import { useOrganizationStore } from './use-active-organization';
 
+/** Loads the user's organizations once and exposes them with loading state. */
 export function useOrganizationList() {
   const organizations = useOrganizationStore((state) => state.organizations);
   const isLoading = useOrganizationStore((state) => state.isLoading);

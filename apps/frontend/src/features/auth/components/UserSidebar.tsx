@@ -18,6 +18,7 @@ function getInitials(name: string): string {
     .join('');
 }
 
+/** Left sidebar: organization menu, projects, user info and settings trigger. */
 export function UserSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useCurrentUser();

@@ -16,11 +16,13 @@ interface GeminiGenerateResponse {
   };
 }
 
-// Adapter de chat contra la API de Google AI Studio (generateContent).
-// Mismo host que el adapter de embeddings; la key llega por request
-// porque es la de la organización (descifrada server-side), no una
-// global del backend.
+/**
+ * Chat adapter for the Google AI Studio API (generateContent). Same host
+ * as the embeddings adapter; the key arrives per request because it is
+ * the organization's key (decrypted server-side), not a backend global.
+ */
 export class GeminiLlmAdapter implements LlmProviderPort {
+  /** @throws LlmRequestFailedError when Gemini returns an error or an empty candidate. */
   async generate(input: LlmGenerateInput): Promise<LlmGenerateResult> {
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/` +
@@ -28,7 +30,7 @@ export class GeminiLlmAdapter implements LlmProviderPort {
 
     const contents = [
       ...input.history.map((message) => ({
-        // Gemini llama 'model' al rol del asistente.
+        // Gemini calls the assistant role 'model'.
         role: message.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: message.content }],
       })),
@@ -39,8 +41,8 @@ export class GeminiLlmAdapter implements LlmProviderPort {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // La key va en header (no en query string) para que no quede en
-        // logs de acceso.
+        // The key goes in a header (not the query string) so it never
+        // lands in access logs.
         'x-goog-api-key': input.apiKey,
       },
       body: JSON.stringify({
@@ -73,14 +75,16 @@ export class GeminiLlmAdapter implements LlmProviderPort {
   }
 }
 
-// El cuerpo de error de Google es JSON con { error: { message } }; si no
-// se puede parsear se devuelve el texto crudo truncado.
+/**
+ * Google error bodies are JSON shaped as { error: { message } }; when the
+ * body is not parseable the raw text is returned truncated.
+ */
 function extractErrorMessage(body: string): string {
   try {
     const parsed = JSON.parse(body) as { error?: { message?: string } };
     if (parsed.error?.message) return parsed.error.message.slice(0, 300);
   } catch {
-    // no era JSON
+    // not JSON
   }
   return body.slice(0, 300);
 }

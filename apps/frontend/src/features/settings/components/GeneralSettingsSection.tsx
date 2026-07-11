@@ -4,13 +4,14 @@ import { Input } from '@/components/ui/input';
 import { useCurrentUser } from '@/features/auth/application/use-current-user';
 import { useUpdateProfile } from '../application/use-update-profile';
 
+/** Profile section of Settings: edit the display name. */
 export function GeneralSettingsSection() {
   const { user } = useCurrentUser();
   const { updateProfile, isSaving, error } = useUpdateProfile();
   const [fullName, setFullName] = useState(user?.name ?? '');
   const [saved, setSaved] = useState(false);
 
-  // Sincroniza el input si el usuario carga después de abrir el modal.
+  // Syncs the input if the user loads after the modal is opened.
   useEffect(() => {
     setFullName(user?.name ?? '');
   }, [user?.name]);

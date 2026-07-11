@@ -8,6 +8,7 @@ import { useRegister } from '../application/use-register';
 
 const PASSWORD_MIN_LENGTH = 8;
 
+/** Account creation page. */
 export function RegisterPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();

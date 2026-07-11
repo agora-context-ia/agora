@@ -3,8 +3,8 @@ import { CatalogNotFoundError } from '../../../contexts/parameters/modules/catal
 import { container } from '../../container';
 import { requireAuth } from '../require-auth';
 
-// Catálogos de solo lectura (schema parameters): el front los usa para
-// poblar selects. Referenciados SIEMPRE por code, nunca por id.
+// Read-only catalogs (parameters schema): the frontend uses them to
+// populate selects. ALWAYS referenced by code, never by id.
 export const catalogsRouter: Router = Router();
 
 catalogsRouter.use(requireAuth);

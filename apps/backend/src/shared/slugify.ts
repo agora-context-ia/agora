@@ -1,5 +1,7 @@
-// Slug URL-safe a partir de un nombre: minúsculas, sin acentos, solo
-// [a-z0-9-]. Compartido por organizaciones y espacios.
+/**
+ * URL-safe slug from a display name: lowercase, accents stripped, only
+ * [a-z0-9-]. Shared by organizations and spaces.
+ */
 export function slugify(name: string): string {
   return name
     .normalize('NFD')

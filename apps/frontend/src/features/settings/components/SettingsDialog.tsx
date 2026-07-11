@@ -16,8 +16,10 @@ const SECTIONS: Array<{ value: SettingsSection; label: string; icon: typeof User
   { value: 'ai-models', label: 'Modelos IA', icon: Sparkles },
 ];
 
-// Modal de configuración centralizado: nav lateral + panel de contenido.
-// Se renderiza una sola vez (AppShell) y se abre vía useSettingsDialog.
+/**
+ * Centralized settings modal: side nav + content panel. Rendered once
+ * (AppShell) and opened via useSettingsDialog.
+ */
 export function SettingsDialog() {
   const isOpen = useSettingsDialog((state) => state.isOpen);
   const section = useSettingsDialog((state) => state.section);

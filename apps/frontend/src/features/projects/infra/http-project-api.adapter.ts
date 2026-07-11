@@ -3,7 +3,7 @@ import { apiFetch } from '@/lib/api';
 import type { Project } from '../domain/project';
 import type { CreateProjectInput, ProjectApiPort } from '../ports/project-api.port';
 
-// En el backend los "proyectos" son spaces dentro de una organización.
+// In the backend, UI "projects" are spaces inside an organization.
 function toProject(dto: SpaceDto): Project {
   return {
     id: dto.id,
@@ -35,4 +35,5 @@ class HttpProjectApiAdapter implements ProjectApiPort {
   }
 }
 
+/** HTTP implementation of the project API port (maps SpaceDto → Project). */
 export const projectApiAdapter = new HttpProjectApiAdapter();

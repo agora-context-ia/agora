@@ -1,12 +1,16 @@
-import type { SpaceAccessPort } from '../../../../../knowledge-management/modules/documents/ports/space-access.port';
-import type { OrganizationMembershipPort } from '../../../../../knowledge-management/modules/projects/ports/organization-membership.port';
 import {
   NotOrganizationMemberError,
   SpaceNotFoundInOrganizationError,
   type ChatMessage,
 } from '../../domain/chat';
 import type { ConversationRepositoryPort } from '../../ports/conversation-repository.port';
+import type { OrganizationMembershipPort } from '../../ports/organization-membership.port';
+import type { SpaceAccessPort } from '../../ports/space-access.port';
 
+/**
+ * Returns the user's conversation history for a space, oldest first.
+ * An empty array means the user has not chatted in that space yet.
+ */
 export class GetChatHistoryUseCase {
   constructor(
     private readonly membership: OrganizationMembershipPort,
@@ -14,6 +18,10 @@ export class GetChatHistoryUseCase {
     private readonly conversations: ConversationRepositoryPort,
   ) {}
 
+  /**
+   * @throws NotOrganizationMemberError when the user is not a member.
+   * @throws SpaceNotFoundInOrganizationError when the space belongs to another org.
+   */
   async execute(
     userId: string,
     organizationId: string,

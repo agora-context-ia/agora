@@ -1,22 +1,9 @@
-export interface Project {
-  id: string;
-  name: string;
-}
-
-export interface Document {
-  id: string;
-  projectId: string;
-  name: string;
-}
-
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
+// HTTP contract DTOs shared between backend and frontend. Data shapes
+// only — no logic. A backend response change updates this file and the
+// frontend adapter mapping in the same PR (see AGENTS.md).
 
 // ---------------------------------------------------------------------
-// Organizaciones
+// Organizations
 // ---------------------------------------------------------------------
 
 export type OrganizationRoleDto = 'owner' | 'admin' | 'member';
@@ -33,7 +20,7 @@ export interface CreateOrganizationDto {
 }
 
 // ---------------------------------------------------------------------
-// Espacios (proyectos dentro de una organización)
+// Spaces (projects inside an organization)
 // ---------------------------------------------------------------------
 
 export interface SpaceDto {
@@ -53,7 +40,7 @@ export interface CreateSpaceDto {
 }
 
 // ---------------------------------------------------------------------
-// Documentos (fuentes de contexto de un espacio)
+// Documents (context sources of a space)
 // ---------------------------------------------------------------------
 
 export type DocumentProcessingStatusDto = 'pending' | 'processing' | 'ready' | 'error';
@@ -85,8 +72,8 @@ export interface SemanticSearchHitDto {
 }
 
 // ---------------------------------------------------------------------
-// Configuración de IA por organización. La API key nunca viaja completa
-// hacia el frontend: solo apiKeyLastFour.
+// Per-organization AI configuration. The API key never travels complete
+// to the frontend: only apiKeyLastFour.
 // ---------------------------------------------------------------------
 
 export type AiProviderDto = 'gemini';
@@ -110,7 +97,7 @@ export interface SaveAiProviderKeyDto {
 }
 
 // ---------------------------------------------------------------------
-// Chat sobre la documentación de un espacio
+// Chat over a space's documentation
 // ---------------------------------------------------------------------
 
 export type ChatRoleDto = 'user' | 'assistant';
@@ -140,7 +127,7 @@ export interface SendChatMessageResponseDto {
 }
 
 // ---------------------------------------------------------------------
-// Perfil de usuario
+// User profile
 // ---------------------------------------------------------------------
 
 export interface UpdateProfileDto {
@@ -148,7 +135,7 @@ export interface UpdateProfileDto {
 }
 
 // ---------------------------------------------------------------------
-// Catálogos (schema parameters). El code es el contrato estable.
+// Catalogs (parameters schema). The code is the stable contract.
 // ---------------------------------------------------------------------
 
 export interface CatalogItemDto {
@@ -159,7 +146,7 @@ export interface CatalogItemDto {
 }
 
 // ---------------------------------------------------------------------
-// Eventos realtime (SSE): señales de invalidación, nunca llevan datos.
+// Realtime events (SSE): invalidation signals, they never carry data.
 // ---------------------------------------------------------------------
 
 export interface DocumentUpdatedEventDto {

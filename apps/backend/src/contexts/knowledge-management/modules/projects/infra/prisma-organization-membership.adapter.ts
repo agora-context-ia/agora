@@ -1,6 +1,7 @@
 import { prisma } from '../../../../../infrastructure/persistence/prisma-client';
 import type { OrganizationMembershipPort } from '../ports/organization-membership.port';
 
+/** Checks active membership against organization_members. */
 export class PrismaOrganizationMembershipAdapter implements OrganizationMembershipPort {
   async isMember(userId: string, organizationId: string): Promise<boolean> {
     const membership = await prisma.organizationMember.findFirst({

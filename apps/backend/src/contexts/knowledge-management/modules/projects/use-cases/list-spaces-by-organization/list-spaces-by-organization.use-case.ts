@@ -2,8 +2,10 @@ import { NotOrganizationMemberError, type Space } from '../../domain/space';
 import type { OrganizationMembershipPort } from '../../ports/organization-membership.port';
 import type { SpaceRepositoryPort } from '../../ports/space-repository.port';
 
-// Dentro de una organización no hay espacios privados entre miembros:
-// si el usuario es member, ve todos los espacios de la org.
+/**
+ * Inside an organization there are no spaces private between members:
+ * if the user is a member, they see every space of the org.
+ */
 export class ListSpacesByOrganizationUseCase {
   constructor(
     private readonly spaces: SpaceRepositoryPort,

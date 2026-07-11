@@ -13,6 +13,7 @@ interface SettingsDialogState {
   setSection: (section: SettingsSection) => void;
 }
 
+/** Store controlling the Settings modal: open state and active section. */
 export const useSettingsDialog = create<SettingsDialogState>((set) => ({
   isOpen: false,
   section: 'general',

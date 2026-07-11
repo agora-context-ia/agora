@@ -3,6 +3,7 @@ import type { AuthApiPort, LoginInput, RegisterInput } from '../ports/auth-api.p
 
 const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
+/** Auth-specific HTTP error with the backend message. */
 export class AuthApiError extends Error {
   constructor(
     message: string,
@@ -23,8 +24,8 @@ function toUser(apiUser: ApiUser): User {
   return { id: apiUser.id, name: apiUser.fullName, email: apiUser.email };
 }
 
-// La sesión viaja en una cookie httpOnly que setea el backend:
-// credentials 'include' hace que el navegador la envíe/acepte cross-origin.
+// The session travels in an httpOnly cookie set by the backend:
+// credentials 'include' makes the browser send/accept it cross-origin.
 async function request(path: string, init?: RequestInit): Promise<Response> {
   return fetch(`${API_URL}${path}`, {
     credentials: 'include',
@@ -72,4 +73,5 @@ class HttpAuthApiAdapter implements AuthApiPort {
   }
 }
 
+/** HTTP implementation of the auth API port. */
 export const authApiAdapter = new HttpAuthApiAdapter();

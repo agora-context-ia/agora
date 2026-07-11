@@ -7,8 +7,8 @@ import { requireAuth } from '../require-auth';
 
 const HEARTBEAT_MS = 25_000;
 
-// Canal SSE por usuario: señal de invalidación (el front refetchea por la
-// API normal al recibir un evento). Se abre al iniciar sesión.
+// Per-user SSE channel: invalidation signal (the frontend refetches via
+// the regular API when it receives an event). Opened on login.
 export const eventsRouter: Router = Router();
 
 eventsRouter.get('/', requireAuth, (req: Request, res: Response) => {
@@ -18,7 +18,7 @@ eventsRouter.get('/', requireAuth, (req: Request, res: Response) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no'); // nginx: no bufferizar el stream
+  res.setHeader('X-Accel-Buffering', 'no'); // nginx: do not buffer the stream
   res.flushHeaders();
   res.write(': connected\n\n');
 

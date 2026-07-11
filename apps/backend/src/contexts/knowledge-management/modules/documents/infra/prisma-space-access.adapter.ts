@@ -1,6 +1,7 @@
 import { prisma } from '../../../../../infrastructure/persistence/prisma-client';
 import type { SpaceAccessPort } from '../ports/space-access.port';
 
+/** Resolves the owning organization of a space from the spaces table. */
 export class PrismaSpaceAccessAdapter implements SpaceAccessPort {
   async findSpaceOrganization(spaceId: string): Promise<string | null> {
     const space = await prisma.space.findFirst({

@@ -1,5 +1,6 @@
 import type { DocumentProcessingStatus } from '../domain/document';
 
+/** Emitted whenever a document changes processing status. */
 export interface DocumentUpdatedEvent {
   organizationId: string;
   spaceId: string;
@@ -7,9 +8,11 @@ export interface DocumentUpdatedEvent {
   status: DocumentProcessingStatus;
 }
 
-// Señal de invalidación hacia el frontend (SSE): avisa CUÁNDO volver a hacer
-// GET; nunca lleva los datos. La infra resuelve a qué usuarios notificar
-// (miembros activos de la organización) y publica vía Redis pub/sub.
+/**
+ * Invalidation signal towards the frontend (SSE): tells WHEN to re-fetch;
+ * it never carries the data. Infra resolves which users to notify (active
+ * members of the organization) and publishes via Redis pub/sub.
+ */
 export interface RealtimeNotifierPort {
   notifyDocumentUpdated(event: DocumentUpdatedEvent): Promise<void>;
 }

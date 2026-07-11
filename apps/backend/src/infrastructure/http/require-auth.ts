@@ -13,8 +13,10 @@ declare global {
   }
 }
 
-// Middleware para rutas privadas: valida la cookie de sesión y expone el
-// usuario autenticado en req.userId / req.authUser.
+/**
+ * Middleware for private routes: validates the session cookie and exposes
+ * the authenticated user on req.userId / req.authUser.
+ */
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = (req.cookies as Record<string, string | undefined>)[SESSION_COOKIE_NAME];
   if (typeof token !== 'string' || token.length === 0) {

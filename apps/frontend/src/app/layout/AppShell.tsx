@@ -5,6 +5,7 @@ import { useOrganizationList } from '@/features/organizations/application/use-or
 import { ProjectSidebar } from '@/features/projects/components/ProjectSidebar';
 import { SettingsDialog } from '@/features/settings/components/SettingsDialog';
 
+/** Authenticated layout: sidebar + routed content, plus onboarding gate. */
 export function AppShell() {
   const { organizations, hasLoaded } = useOrganizationList();
 
@@ -16,7 +17,7 @@ export function AppShell() {
     );
   }
 
-  // Usuario recién registrado: sin organizaciones todavía.
+  // Freshly registered user: no organizations yet.
   if (organizations.length === 0) {
     return <OnboardingScreen />;
   }

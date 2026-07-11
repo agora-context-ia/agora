@@ -66,7 +66,7 @@ function handleChatError(error: unknown, res: Response): Response {
     return res.status(400).json({ error: error.message });
   }
   if (error instanceof AiProviderNotConfiguredError) {
-    // 409: el request es válido pero falta configuración de la org.
+    // 409: the request is valid but the org configuration is missing.
     return res.status(409).json({ error: error.message });
   }
   if (error instanceof LlmRequestFailedError) {

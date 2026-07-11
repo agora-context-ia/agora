@@ -2,6 +2,7 @@ import { prisma } from '../../../../../infrastructure/persistence/prisma-client'
 import type { CatalogItem } from '../domain/catalog';
 import type { CatalogRepositoryPort } from '../ports/catalog-repository.port';
 
+/** Prisma-backed reader for the parameters.catalogs tables. */
 export class PrismaCatalogRepository implements CatalogRepositoryPort {
   async catalogExists(catalogCode: string): Promise<boolean> {
     const catalog = await prisma.catalog.findFirst({

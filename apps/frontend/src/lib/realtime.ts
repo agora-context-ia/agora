@@ -1,9 +1,9 @@
 import type { RealtimeEventDto } from '@contexthub-ai/shared-types';
 
-// Canal SSE por sesión: el backend publica señales de invalidación
-// (ej. document.updated) y la UI refetchea por la API normal. Un solo
-// EventSource vivo por sesión; se abre al iniciar/restaurar sesión y se
-// cierra en el logout (ver use-auth).
+// Per-session SSE channel: the backend publishes invalidation signals
+// (e.g. document.updated) and the UI refetches through the regular API.
+// A single live EventSource per session; opened on login/restore and
+// closed on logout (see use-auth).
 
 const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
@@ -15,6 +15,7 @@ let wasDown = false;
 const eventHandlers = new Set<EventHandler>();
 const reconnectHandlers = new Set<ReconnectHandler>();
 
+/** Opens the per-session SSE channel (idempotent). */
 export function connectRealtime(): void {
   if (source) return;
 
@@ -29,8 +30,8 @@ export function connectRealtime(): void {
     }
   };
 
-  // EventSource reconecta solo; al volver se avisa para un refetch de
-  // seguridad (pudo perderse un evento mientras el canal estaba caído).
+  // EventSource reconnects on its own; on recovery a safety refetch is
+  // signaled (an event may have been lost while the channel was down).
   source.onerror = () => {
     wasDown = true;
   };
@@ -42,17 +43,20 @@ export function connectRealtime(): void {
   };
 }
 
+/** Closes the SSE channel (called on logout). */
 export function disconnectRealtime(): void {
   source?.close();
   source = null;
   wasDown = false;
 }
 
+/** Subscribes to realtime events; returns an unsubscribe function. */
 export function subscribeRealtime(handler: EventHandler): () => void {
   eventHandlers.add(handler);
   return () => eventHandlers.delete(handler);
 }
 
+/** Notifies after a channel reconnection so consumers can refetch. */
 export function subscribeRealtimeReconnect(handler: ReconnectHandler): () => void {
   reconnectHandlers.add(handler);
   return () => reconnectHandlers.delete(handler);

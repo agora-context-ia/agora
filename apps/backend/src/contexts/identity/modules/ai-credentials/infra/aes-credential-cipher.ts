@@ -1,15 +1,18 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import type { CredentialCipherPort } from '../ports/credential-cipher.port';
 
-// AES-256-GCM con clave de servidor (CREDENTIALS_ENCRYPTION_KEY, 32 bytes
-// hex). El payload guardado es `iv:tag:ciphertext` en base64: el IV es
-// aleatorio por operación y el tag GCM autentica el contenido (un payload
-// manipulado falla al descifrar en vez de devolver basura).
 const IV_LENGTH = 12;
 
+/**
+ * AES-256-GCM with a server key (CREDENTIALS_ENCRYPTION_KEY, 32 bytes
+ * hex). The stored payload is `iv:tag:ciphertext` in base64: the IV is
+ * random per operation and the GCM tag authenticates the content (a
+ * tampered payload fails to decrypt instead of returning garbage).
+ */
 export class AesCredentialCipher implements CredentialCipherPort {
   private readonly key: Buffer;
 
+  /** @throws Error when the key is not exactly 32 hex-encoded bytes. */
   constructor(hexKey: string) {
     if (!/^[0-9a-fA-F]{64}$/.test(hexKey)) {
       throw new Error(

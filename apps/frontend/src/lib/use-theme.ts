@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+/** UI color scheme. */
 export type Theme = 'light' | 'dark';
 
 const STORAGE_KEY = 'contexthub-theme';
@@ -14,9 +15,11 @@ function getInitialTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-// El <head> de index.html ya aplica la clase 'dark' antes de que React
-// monte (evita el flash del tema equivocado); este hook solo sincroniza
-// el estado de React con lo que ya quedó aplicado, y persiste cambios.
+/**
+ * index.html's <head> already applies the 'dark' class before React
+ * mounts (avoids the wrong-theme flash); this hook only syncs React
+ * state with what is already applied, and persists changes.
+ */
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => (typeof window === 'undefined' ? 'light' : getInitialTheme()));
 

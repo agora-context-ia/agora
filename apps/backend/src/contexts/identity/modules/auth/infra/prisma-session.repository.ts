@@ -5,6 +5,7 @@ import type {
   SessionRepositoryPort,
 } from '../ports/session-repository.port';
 
+/** Prisma-backed session store (security.sessions). */
 export class PrismaSessionRepository implements SessionRepositoryPort {
   async create(input: CreateSessionInput): Promise<void> {
     await prisma.session.create({

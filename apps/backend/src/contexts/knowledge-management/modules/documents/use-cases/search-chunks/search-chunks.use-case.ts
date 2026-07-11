@@ -11,9 +11,11 @@ import type { SpaceAccessPort } from '../../ports/space-access.port';
 const DEFAULT_LIMIT = 8;
 const MAX_LIMIT = 50;
 
-// Búsqueda semántica dentro de un espacio. El query se embebe con el MISMO
-// proveedor activo y se filtra por su model_name: vectores de modelos
-// distintos nunca se comparan entre sí.
+/**
+ * Semantic search inside a space. The query is embedded with the SAME
+ * active provider and filtered by its model_name: vectors from different
+ * models are never compared against each other.
+ */
 export class SearchChunksUseCase {
   constructor(
     private readonly embeddings: EmbeddingRepositoryPort,

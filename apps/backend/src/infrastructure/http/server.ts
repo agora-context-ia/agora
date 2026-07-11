@@ -15,11 +15,12 @@ import { organizationsRouter } from './routes/organizations.routes';
 import { searchRouter } from './routes/search.routes';
 import { spacesRouter } from './routes/spaces.routes';
 
+/** Builds the Express app, mounts every router and starts listening. */
 export function startServer() {
   const app = express();
 
-  // credentials: true -> el navegador acepta/envía la cookie de sesión
-  // en requests cross-origin desde el frontend (fetch con include).
+  // credentials: true -> the browser accepts/sends the session cookie on
+  // cross-origin requests from the frontend (fetch with include).
   app.use(cors({ origin: env.CORS_ORIGINS, credentials: true }));
   app.use(express.json());
   app.use(cookieParser());
@@ -38,8 +39,8 @@ export function startServer() {
   app.use('/api/catalogs', catalogsRouter);
   app.use('/api/events', eventsRouter);
 
-  // Pub/sub Redis -> sockets SSE locales, y worker de procesamiento de
-  // documentos (mismo proceso por ahora).
+  // Redis pub/sub -> local SSE sockets, plus the document processing
+  // worker (same process for now).
   startRealtimeEventBus();
   startDocumentProcessingWorker(container.processDocument);
 

@@ -1,5 +1,9 @@
-// Wiring manual de dependencias (composition root). Si el grafo crece,
-// migrar a awilix o similar.
+/**
+ * Composition root: the only place where adapters and use cases are
+ * instantiated and wired together (manual DI). If the graph grows,
+ * consider migrating to awilix or similar.
+ */
+import { EmbeddingContextSearchAdapter } from '../contexts/ai/modules/chat/infra/embedding-context-search.adapter';
 import { GeminiLlmAdapter } from '../contexts/ai/modules/chat/infra/gemini-llm.adapter';
 import { OrgCredentialLlmKeyAdapter } from '../contexts/ai/modules/chat/infra/org-credential-llm-key.adapter';
 import { PrismaConversationRepository } from '../contexts/ai/modules/chat/infra/prisma-conversation.repository';
@@ -29,6 +33,7 @@ import {
   readDocumentFile,
   saveDocumentFile,
 } from '../contexts/knowledge-management/modules/documents/infra/file-storage';
+import { fileTextExtractor } from '../contexts/knowledge-management/modules/documents/infra/text-extractor';
 import { PrismaClassificationLookupAdapter } from '../contexts/knowledge-management/modules/documents/infra/prisma-classification-lookup.adapter';
 import { PrismaDocumentRepository } from '../contexts/knowledge-management/modules/documents/infra/prisma-document.repository';
 import { PrismaEmbeddingRepository } from '../contexts/knowledge-management/modules/documents/infra/prisma-embedding.repository';
@@ -92,7 +97,11 @@ const llmProvider = new GeminiLlmAdapter();
 const llmCredentials = new OrgCredentialLlmKeyAdapter(aiCredentialRepository, credentialCipher, {
   gemini: env.GEMINI_API_KEY,
 });
+// Chat retrieves context through its own port; the adapter composes the
+// knowledge-management embedding infrastructure (anti-corruption layer).
+const chatContextSearch = new EmbeddingContextSearchAdapter(embeddingProvider, embeddingRepository);
 
+/** Every use case of the application, fully wired. Routes import only this. */
 export const container = {
   // identity/auth
   registerUser: new RegisterUserUseCase(userRepository, sessionRepository, passwordHasher),
@@ -129,6 +138,7 @@ export const container = {
     organizationMembership,
     spaceAccess,
     classificationLookup,
+    fileTextExtractor,
     fileStorage,
     documentProcessingQueue,
   ),
@@ -138,6 +148,7 @@ export const container = {
     embeddingProvider,
     spaceAccess,
     fileStorage,
+    fileTextExtractor,
     realtimeNotifier,
   ),
   listDocuments: new ListDocumentsUseCase(documentRepository, organizationMembership, spaceAccess),
@@ -168,8 +179,7 @@ export const container = {
     conversationRepository,
     llmCredentials,
     llmProvider,
-    embeddingProvider,
-    embeddingRepository,
+    chatContextSearch,
   ),
   getChatHistory: new GetChatHistoryUseCase(
     organizationMembership,

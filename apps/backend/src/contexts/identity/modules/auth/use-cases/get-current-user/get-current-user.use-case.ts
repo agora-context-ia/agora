@@ -3,6 +3,7 @@ import { hashSessionToken } from '../../domain/session-token';
 import type { SessionRepositoryPort } from '../../ports/session-repository.port';
 import type { UserRepositoryPort } from '../../ports/user-repository.port';
 
+/** Resolves the authenticated user from a session token, or null when invalid/expired. */
 export class GetCurrentUserUseCase {
   constructor(
     private readonly users: UserRepositoryPort,

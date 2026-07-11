@@ -13,6 +13,7 @@ interface ChatStoreState {
   setSending: (isSending: boolean) => void;
 }
 
+/** Store holding messages per project conversation. */
 export const useChatStore = create<ChatStoreState>((set, get) => ({
   messagesByProject: {},
   loadedProjectIds: new Set(),
@@ -26,7 +27,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     try {
       messages = await chatApiAdapter.getHistory(organizationId, projectId);
     } catch {
-      // Sin historial disponible (backend caído o error): chat vacío.
+      // No history available (backend down or error): empty chat.
     }
 
     set((state) => ({
@@ -48,6 +49,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   setSending: (isSending) => set({ isSending }),
 }));
 
+/** Loads the conversation history for the active project. */
 export function useConversation(organizationId: string | null, projectId: string | null) {
   const messagesByProject = useChatStore((state) => state.messagesByProject);
   const isLoading = useChatStore((state) => state.isLoading);

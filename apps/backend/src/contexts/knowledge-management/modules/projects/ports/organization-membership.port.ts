@@ -1,5 +1,7 @@
-// Puerto hacia el contexto identity: los espacios necesitan saber si el
-// usuario pertenece a la organización, sin acoplarse a sus modelos.
+/**
+ * Port towards the identity context: spaces need to know whether the user
+ * belongs to the organization, without coupling to its models.
+ */
 export interface OrganizationMembershipPort {
   isMember(userId: string, organizationId: string): Promise<boolean>;
 }

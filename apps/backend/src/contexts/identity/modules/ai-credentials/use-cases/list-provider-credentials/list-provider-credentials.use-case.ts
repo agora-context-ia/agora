@@ -1,22 +1,23 @@
-import {
-  AI_PROVIDERS,
-  AI_PROVIDER_CATALOG,
-  NotOrganizationMemberError,
-  type ProviderSetting,
-} from '../../domain/ai-provider-credential';
+import { AI_PROVIDERS, AI_PROVIDER_CATALOG } from '../../../../../../shared/ai-provider-catalog';
+import { NotOrganizationMemberError, type ProviderSetting } from '../../domain/ai-provider-credential';
 import type { AiCredentialRepositoryPort } from '../../ports/ai-credential-repository.port';
 import type { OrganizationRolePort } from '../../ports/organization-role.port';
 
-// Cualquier miembro activo puede ver qué proveedores están configurados
-// (no hace falta ser admin). Devuelve TODOS los proveedores soportados
-// con su catálogo de modelos, configurados o no: el frontend arma tanto
-// la sección de Settings como el selector del chat con esta misma lista.
+/**
+ * Lists the AI provider settings of an organization.
+ *
+ * Any active member can read this (admin is not required). It returns ALL
+ * supported providers with their model catalog, configured or not: the
+ * frontend builds both the Settings section and the chat model selector
+ * from this same list.
+ */
 export class ListProviderCredentialsUseCase {
   constructor(
     private readonly roles: OrganizationRolePort,
     private readonly credentials: AiCredentialRepositoryPort,
   ) {}
 
+  /** @throws NotOrganizationMemberError when the user is not a member of the organization. */
   async execute(userId: string, organizationId: string): Promise<ProviderSetting[]> {
     const role = await this.roles.getRole(userId, organizationId);
     if (role === null) throw new NotOrganizationMemberError();

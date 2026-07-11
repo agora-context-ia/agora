@@ -16,6 +16,7 @@ interface CreateOrganizationDialogProps {
   trigger: ReactNode;
 }
 
+/** Modal form to create an organization; the new one becomes active. */
 export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');

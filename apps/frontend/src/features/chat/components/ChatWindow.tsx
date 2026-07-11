@@ -8,6 +8,7 @@ import { ChatInput } from './ChatInput';
 import { EmptyState } from './EmptyState';
 import { MessageList } from './MessageList';
 
+/** Chat screen of the active project: history, composer and empty states. */
 export function ChatWindow() {
   const activeOrganization = useActiveOrganization();
   const activeProject = useActiveProject();

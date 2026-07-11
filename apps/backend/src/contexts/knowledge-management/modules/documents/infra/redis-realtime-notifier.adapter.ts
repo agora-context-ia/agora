@@ -5,8 +5,10 @@ import type {
   RealtimeNotifierPort,
 } from '../ports/realtime-notifier.port';
 
-// Notifica a TODOS los miembros activos de la organización (todos ven los
-// espacios de la org). El evento es solo la señal de invalidación.
+/**
+ * Notifies ALL active members of the organization (everyone sees the
+ * org's spaces). The event is only an invalidation signal.
+ */
 export class RedisRealtimeNotifierAdapter implements RealtimeNotifierPort {
   async notifyDocumentUpdated(event: DocumentUpdatedEvent): Promise<void> {
     const members = await prisma.organizationMember.findMany({

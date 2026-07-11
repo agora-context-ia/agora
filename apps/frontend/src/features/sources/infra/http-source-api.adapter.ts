@@ -72,4 +72,5 @@ class HttpSourceApiAdapter implements SourceApiPort {
   }
 }
 
+/** HTTP implementation of the source API port. */
 export const sourceApiAdapter = new HttpSourceApiAdapter();

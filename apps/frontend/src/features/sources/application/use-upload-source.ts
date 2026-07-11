@@ -4,8 +4,9 @@ import { sourceApiAdapter } from '../infra/http-source-api.adapter';
 import { useSourceStore } from './use-sources';
 
 /**
- * Sube un archivo con su clasificación. El documento entra en pending y su
- * avance (processing → ready | error) llega por SSE, que refetchea la lista.
+ * Uploads a file with its classification. The document starts as pending
+ * and its progress (processing → ready | error) arrives over SSE, which
+ * refetches the list.
  */
 export function useUploadSource(organizationId: string | null, projectId: string | null) {
   const upsertSource = useSourceStore((state) => state.upsertSource);

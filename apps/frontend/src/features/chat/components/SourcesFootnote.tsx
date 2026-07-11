@@ -7,6 +7,7 @@ interface SourcesFootnoteProps {
   sources: MessageSource[];
 }
 
+/** Collapsible list of the documents that grounded a reply. */
 export function SourcesFootnote({ sources }: SourcesFootnoteProps) {
   const [isOpen, setIsOpen] = useState(false);
 

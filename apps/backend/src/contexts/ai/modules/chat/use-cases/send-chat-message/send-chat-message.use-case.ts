@@ -1,8 +1,4 @@
-import { AI_PROVIDER_CATALOG } from '../../../../../identity/modules/ai-credentials/domain/ai-provider-credential';
-import type { EmbeddingProviderPort } from '../../../../../knowledge-management/modules/documents/ports/embedding-provider.port';
-import type { EmbeddingRepositoryPort } from '../../../../../knowledge-management/modules/documents/ports/embedding-repository.port';
-import type { SpaceAccessPort } from '../../../../../knowledge-management/modules/documents/ports/space-access.port';
-import type { OrganizationMembershipPort } from '../../../../../knowledge-management/modules/projects/ports/organization-membership.port';
+import { AI_PROVIDER_CATALOG } from '../../../../../../shared/ai-provider-catalog';
 import {
   AiProviderNotConfiguredError,
   NotOrganizationMemberError,
@@ -13,10 +9,14 @@ import {
   type ChatSource,
 } from '../../domain/chat';
 import { buildSystemPrompt } from '../../domain/chat-prompts';
+import type { ContextSearchPort } from '../../ports/context-search.port';
 import type { ConversationRepositoryPort } from '../../ports/conversation-repository.port';
 import type { LlmCredentialPort } from '../../ports/llm-credential.port';
 import type { LlmProviderPort } from '../../ports/llm-provider.port';
+import type { OrganizationMembershipPort } from '../../ports/organization-membership.port';
+import type { SpaceAccessPort } from '../../ports/space-access.port';
 
+/** A user question: target space, task mode and (optional) model. */
 export interface SendChatMessageInput {
   userId: string;
   organizationId: string;
@@ -26,18 +26,26 @@ export interface SendChatMessageInput {
   model: string | null;
 }
 
+/** The assistant reply plus the deduplicated sources shown in the UI. */
 export interface SendChatMessageResult {
   message: ChatMessage;
   sources: ChatSource[];
 }
 
-// Cantidad de fragmentos de documentación que se inyectan como contexto
-// y de mensajes previos que se mandan como historial.
+/** Documentation fragments injected as context and prior messages sent as history. */
 const CONTEXT_CHUNKS = 5;
 const HISTORY_MESSAGES = 12;
-// Los fragmentos completos van al prompt; a la UI vuelve una vista corta.
+/** Full fragments go into the prompt; the UI receives a short preview. */
 const SOURCE_FRAGMENT_PREVIEW = 300;
 
+/**
+ * Answers a user question over a space's documentation using the
+ * organization's configured LLM.
+ *
+ * Flow: validate membership and space ownership → resolve model and API
+ * key → retrieve semantic context → call the LLM with the mode-specific
+ * system prompt and recent history → persist both messages.
+ */
 export class SendChatMessageUseCase {
   constructor(
     private readonly membership: OrganizationMembershipPort,
@@ -45,10 +53,16 @@ export class SendChatMessageUseCase {
     private readonly conversations: ConversationRepositoryPort,
     private readonly llmCredentials: LlmCredentialPort,
     private readonly llm: LlmProviderPort,
-    private readonly embeddingProvider: EmbeddingProviderPort,
-    private readonly embeddings: EmbeddingRepositoryPort,
+    private readonly contextSearch: ContextSearchPort,
   ) {}
 
+  /**
+   * @throws NotOrganizationMemberError when the user is not a member.
+   * @throws SpaceNotFoundInOrganizationError when the space belongs to another org.
+   * @throws UnknownChatModelError when the requested model is not in the catalog.
+   * @throws AiProviderNotConfiguredError when no API key is available.
+   * @throws LlmRequestFailedError when the provider call fails (from the LLM adapter).
+   */
   async execute(input: SendChatMessageInput): Promise<SendChatMessageResult> {
     const isMember = await this.membership.isMember(input.userId, input.organizationId);
     if (!isMember) throw new NotOrganizationMemberError();
@@ -75,8 +89,8 @@ export class SendChatMessageUseCase {
       userMessage: input.content,
     });
 
-    // El mensaje del usuario se persiste recién acá: si el LLM falló, la
-    // conversación no queda con preguntas sin respuesta.
+    // The user message is persisted only now: if the LLM call failed, the
+    // conversation is not left with unanswered questions.
     await this.conversations.appendMessage({
       conversationId: conversation.id,
       role: 'user',
@@ -103,32 +117,25 @@ export class SendChatMessageUseCase {
     };
   }
 
-  // Búsqueda semántica en el espacio. Si el proveedor de embeddings no
-  // está disponible (ej. Ollama apagado en local) el chat sigue sin
-  // contexto en vez de romperse.
+  /**
+   * Semantic search over the space. If retrieval is unavailable (e.g.
+   * Ollama down in local dev) the chat continues without context instead
+   * of failing.
+   */
   private async retrieveContext(spaceId: string, query: string): Promise<ChatSource[]> {
     try {
-      const [queryEmbedding] = await this.embeddingProvider.embedBatch([query]);
-      const hits = await this.embeddings.search(
-        spaceId,
-        queryEmbedding,
-        this.embeddingProvider.modelName,
-        CONTEXT_CHUNKS,
-      );
-      return hits.map((hit) => ({
-        documentName: hit.fileName,
-        fragment: hit.content,
-        relevance: hit.score,
-      }));
+      return await this.contextSearch.search(spaceId, query, CONTEXT_CHUNKS);
     } catch {
       return [];
     }
   }
 }
 
-// Al prompt van todos los fragmentos recuperados, pero como fuente la UI
-// muestra una entrada por documento: la de mayor relevancia (los hits ya
-// vienen ordenados por score descendente).
+/**
+ * The prompt receives every retrieved fragment, but the UI shows one
+ * source per document: the most relevant fragment (hits arrive ordered by
+ * descending score).
+ */
 function dedupeByDocument(sources: ChatSource[]): ChatSource[] {
   const seen = new Set<string>();
   return sources.filter((source) => {
@@ -138,8 +145,12 @@ function dedupeByDocument(sources: ChatSource[]): ChatSource[] {
   });
 }
 
-// El modelo elegido define el proveedor (por ahora solo Gemini). Sin
-// modelo explícito se usa el primero del catálogo.
+/**
+ * The chosen model determines the provider (only Gemini for now). Without
+ * an explicit model the first catalog entry is used.
+ *
+ * @throws UnknownChatModelError when the model is not in the catalog.
+ */
 function resolveModel(requested: string | null): { provider: string; model: string } {
   if (requested === null || requested === '') {
     return { provider: 'gemini', model: AI_PROVIDER_CATALOG.gemini.models[0].value };

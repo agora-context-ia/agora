@@ -9,6 +9,7 @@ interface MessageListProps {
   isSending: boolean;
 }
 
+/** Scrollable list of conversation messages with a typing indicator. */
 export function MessageList({ messages, isSending }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 

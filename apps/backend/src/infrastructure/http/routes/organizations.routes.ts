@@ -1,7 +1,9 @@
 import { Router, type Request, type Response } from 'express';
+import { OrganizationSlugTakenError } from '../../../contexts/identity/modules/organizations/domain/organization';
 import { container } from '../../container';
 import { requireAuth } from '../require-auth';
 
+/** Routes for the authenticated user's organizations: list and create. */
 export const organizationsRouter: Router = Router();
 
 organizationsRouter.use(requireAuth);
@@ -18,9 +20,17 @@ organizationsRouter.post('/', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'El nombre debe tener al menos 2 caracteres' });
   }
 
-  const organization = await container.createOrganization.execute({
-    userId: req.userId!,
-    name: name.trim(),
-  });
-  return res.status(201).json({ organization });
+  try {
+    const organization = await container.createOrganization.execute({
+      userId: req.userId!,
+      name: name.trim(),
+    });
+    return res.status(201).json({ organization });
+  } catch (error) {
+    // The use case retries slugs; this only fires on a concurrent-create race.
+    if (error instanceof OrganizationSlugTakenError) {
+      return res.status(409).json({ error: error.message });
+    }
+    throw error;
+  }
 });

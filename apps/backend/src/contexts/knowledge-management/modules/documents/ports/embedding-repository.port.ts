@@ -1,3 +1,4 @@
+/** A text chunk paired with its embedding vector, ready to persist. */
 export interface ChunkWithEmbedding {
   chunkIndex: number;
   content: string;
@@ -5,6 +6,7 @@ export interface ChunkWithEmbedding {
   embedding: number[];
 }
 
+/** One semantic search result: the chunk plus its source document and score. */
 export interface SemanticSearchHit {
   documentId: string;
   fileName: string;
@@ -13,11 +15,12 @@ export interface SemanticSearchHit {
   score: number;
 }
 
+/** Persistence contract for chunks and their embedding vectors. */
 export interface EmbeddingRepositoryPort {
   /**
-   * Reemplaza chunks + embeddings de una fuente en una transacción (borra lo
-   * anterior e inserta lo nuevo). Son datos derivados del archivo: se borran
-   * en duro, sin soft delete.
+   * Replaces a source's chunks + embeddings in one transaction (deletes
+   * the previous ones and inserts the new ones). Derived data: hard
+   * delete, no soft delete.
    */
   replaceForSource(
     sourceId: string,
@@ -28,7 +31,7 @@ export interface EmbeddingRepositoryPort {
 
   deleteForSource(sourceId: string): Promise<void>;
 
-  /** Búsqueda por similitud coseno, SIEMPRE filtrada por espacio y modelo. */
+  /** Cosine-similarity search, ALWAYS filtered by space and model. */
   search(
     spaceId: string,
     queryEmbedding: number[],

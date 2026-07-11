@@ -6,8 +6,8 @@ import {
 import { container } from '../../container';
 import { requireAuth } from '../require-auth';
 
-// mergeParams: el router se monta en /api/organizations/:orgId/spaces y
-// necesita leer :orgId del path padre.
+// mergeParams: the router mounts at /api/organizations/:orgId/spaces and
+// needs to read :orgId from the parent path.
 export const spacesRouter: Router = Router({ mergeParams: true });
 
 spacesRouter.use(requireAuth);

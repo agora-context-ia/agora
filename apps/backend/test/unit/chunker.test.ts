@@ -3,7 +3,7 @@ import {
   CHUNK_OVERLAP_CHARS,
   CHUNK_TARGET_CHARS,
   chunkText,
-} from '../../src/contexts/knowledge-management/modules/documents/infra/chunker';
+} from '../../src/contexts/knowledge-management/modules/documents/domain/chunker';
 
 describe('chunkText', () => {
   it('devuelve vacío para texto vacío o solo espacios', () => {

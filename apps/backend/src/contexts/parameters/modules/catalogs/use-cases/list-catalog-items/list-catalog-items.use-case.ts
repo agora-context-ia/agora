@@ -1,6 +1,7 @@
 import { CatalogNotFoundError, type CatalogItem } from '../../domain/catalog';
 import type { CatalogRepositoryPort } from '../../ports/catalog-repository.port';
 
+/** Lists the active items of a catalog by its code. */
 export class ListCatalogItemsUseCase {
   constructor(private readonly catalogs: CatalogRepositoryPort) {}
 

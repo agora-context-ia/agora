@@ -7,6 +7,7 @@ import type {
 
 const DEFAULT_MESSAGES_LIMIT = 50;
 
+/** Prisma-backed store for conversations and messages (soft-delete aware). */
 export class PrismaConversationRepository implements ConversationRepositoryPort {
   async findOrCreate(spaceId: string, userId: string): Promise<{ id: string }> {
     const existing = await this.findBySpaceAndUser(spaceId, userId);
@@ -46,7 +47,7 @@ export class PrismaConversationRepository implements ConversationRepositoryPort 
     conversationId: string,
     limit: number = DEFAULT_MESSAGES_LIMIT,
   ): Promise<ChatMessage[]> {
-    // Se traen los últimos `limit` en orden cronológico: desc + reverse.
+    // Fetch the latest `limit` messages in chronological order: desc + reverse.
     const messages = await prisma.message.findMany({
       where: { conversationId, status: true, deletedAt: null },
       orderBy: { createdAt: 'desc' },

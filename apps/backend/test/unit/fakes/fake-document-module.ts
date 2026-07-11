@@ -1,7 +1,8 @@
-// Fakes en memoria compartidos por los tests del módulo documents.
-import type {
-  ContextDocumentEntity,
-  DocumentProcessingStatus,
+// In-memory fakes shared by the documents module tests.
+import {
+  UnsupportedFileTypeError,
+  type ContextDocumentEntity,
+  type DocumentProcessingStatus,
 } from '../../../src/contexts/knowledge-management/modules/documents/domain/document';
 import type {
   ClassificationItem,
@@ -23,6 +24,7 @@ import type {
   RealtimeNotifierPort,
 } from '../../../src/contexts/knowledge-management/modules/documents/ports/realtime-notifier.port';
 import type { SpaceAccessPort } from '../../../src/contexts/knowledge-management/modules/documents/ports/space-access.port';
+import type { TextExtractionPort } from '../../../src/contexts/knowledge-management/modules/documents/ports/text-extraction.port';
 import type { OrganizationMembershipPort } from '../../../src/contexts/knowledge-management/modules/projects/ports/organization-membership.port';
 
 export class FakeDocumentRepository implements DocumentRepositoryPort {
@@ -132,6 +134,16 @@ export class FakeFileStorage {
   }
   async remove(relativePath: string): Promise<void> {
     this.saved.delete(relativePath);
+  }
+}
+
+export class FakeTextExtraction implements TextExtractionPort {
+  isSupported(mimeType: string): boolean {
+    return mimeType.startsWith('text/');
+  }
+  async extract(buffer: Buffer, mimeType: string): Promise<string> {
+    if (!this.isSupported(mimeType)) throw new UnsupportedFileTypeError(mimeType);
+    return buffer.toString('utf-8');
   }
 }
 

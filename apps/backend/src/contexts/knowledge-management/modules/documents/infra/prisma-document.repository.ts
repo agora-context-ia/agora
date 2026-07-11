@@ -24,6 +24,7 @@ const withClassification = {
   classification: { select: { code: true, name: true } },
 } as const;
 
+/** Prisma-backed store for context documents and their sources. */
 export class PrismaDocumentRepository implements DocumentRepositoryPort {
   async createWithSource(data: CreateDocumentData): Promise<ContextDocumentEntity> {
     const document = await prisma.$transaction(async (tx) => {

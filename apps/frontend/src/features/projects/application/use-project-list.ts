@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { useOrganizationStore } from '@/features/organizations/application/use-active-organization';
+import { useActiveOrganizationId } from '@/features/organizations/application/use-active-organization';
 import { projectApiAdapter } from '../infra/http-project-api.adapter';
 import { useProjectStore } from './use-active-project';
 
-// Carga los espacios de la organización activa y recarga al cambiarla.
+/** Loads the active organization's spaces and reloads when it changes. */
 export function useProjectList() {
-  const activeOrganizationId = useOrganizationStore((state) => state.activeOrganizationId);
+  const activeOrganizationId = useActiveOrganizationId();
   const projects = useProjectStore((state) => state.projects);
   const isLoading = useProjectStore((state) => state.isLoading);
   const loadedOrganizationId = useProjectStore((state) => state.loadedOrganizationId);
@@ -23,9 +23,9 @@ export function useProjectList() {
     let cancelled = false;
     setLoading(true);
 
-    // setProjects apaga isLoading de forma atómica (ver store): no se usa
-    // .finally porque el cambio de loadedOrganizationId re-dispara este
-    // efecto y cancela el closure antes de que corra.
+    // setProjects turns isLoading off atomically (see store): .finally is
+    // not used because the loadedOrganizationId change re-fires this
+    // effect and cancels the closure before it runs.
     projectApiAdapter
       .list(activeOrganizationId)
       .then((result) => {

@@ -6,11 +6,13 @@ import type {
   SemanticSearchHit,
 } from '../ports/embedding-repository.port';
 
-// Prisma no soporta el tipo vector en el DSL: los inserts/queries de
-// embeddings van por SQL crudo casteando el literal '[0.1,0.2,...]'::vector.
-
 const INSERT_BATCH_SIZE = 200;
 
+/**
+ * Embedding store on pgvector. Prisma's DSL does not support the vector
+ * type, so embedding inserts/queries use raw SQL casting the literal
+ * '[0.1,0.2,...]'::vector.
+ */
 export class PrismaEmbeddingRepository implements EmbeddingRepositoryPort {
   async replaceForSource(
     sourceId: string,
@@ -99,8 +101,10 @@ export class PrismaEmbeddingRepository implements EmbeddingRepositoryPort {
   }
 }
 
-// Chunks/embeddings son datos derivados del archivo: al reprocesar o borrar
-// se eliminan en duro (el soft delete queda para las entidades de negocio).
+/**
+ * Chunks/embeddings are data derived from the file: on reprocess or delete
+ * they are hard-deleted (soft delete is reserved for business entities).
+ */
 async function deleteDerivedData(tx: Prisma.TransactionClient, sourceId: string): Promise<void> {
   await tx.$executeRaw(Prisma.sql`
     DELETE FROM ai.embeddings e

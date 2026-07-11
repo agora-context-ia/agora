@@ -26,6 +26,7 @@ function formatRelativeDate(iso: string): string {
   return `hace ${diffDays} días`;
 }
 
+/** Row for one project with selection state and actions menu. */
 export function ProjectListItem({ project, isActive, onSelect }: ProjectListItemProps) {
   const navigate = useNavigate();
 
@@ -46,7 +47,7 @@ export function ProjectListItem({ project, isActive, onSelect }: ProjectListItem
         </div>
       </button>
 
-      {/* Botón de tres puntos: siempre visible en el proyecto activo, aparece con hover/foco en el resto para no ensuciar la lista. */}
+      {/* Kebab button: always visible on the active project, shown on hover/focus elsewhere to keep the list clean. */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

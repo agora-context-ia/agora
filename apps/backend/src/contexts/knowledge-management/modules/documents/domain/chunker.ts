@@ -1,28 +1,34 @@
-// Chunking por caracteres aproximando tokens (~4 chars/token, heurística
-// razonable para es/en). Objetivo ~500 tokens con solapamiento ~80 para no
-// perder contexto en los bordes; corta preferentemente en párrafos y
-// oraciones para que cada chunk sea legible por sí solo.
+/**
+ * Character-based chunking approximating tokens (~4 chars/token, a
+ * reasonable heuristic for es/en). Targets ~500 tokens with ~80 of
+ * overlap so context is not lost at boundaries; prefers splitting at
+ * paragraphs and sentences so each chunk reads on its own.
+ */
 
 const CHARS_PER_TOKEN = 4;
+/** Target chunk size in characters (~500 tokens). */
 export const CHUNK_TARGET_CHARS = 2000; // ~500 tokens
+/** Overlap carried between consecutive chunks (~80 tokens). */
 export const CHUNK_OVERLAP_CHARS = 320; // ~80 tokens
 
+/** One chunk of document text ready to embed. */
 export interface TextChunk {
   index: number;
   content: string;
   tokenCount: number;
 }
 
+/** Splits raw text into overlapping chunks sized for embedding. */
 export function chunkText(rawText: string): TextChunk[] {
   const text = rawText.replace(/\r\n/g, '\n').trim();
   if (text.length === 0) return [];
 
-  // 1. Piezas que nunca superan el tamaño objetivo: párrafos, y si un
-  //    párrafo se pasa, sus oraciones (hard-split como último recurso).
+  // 1. Pieces that never exceed the target size: paragraphs, and when a
+  //    paragraph is too long, its sentences (hard-split as last resort).
   const pieces = splitIntoPieces(text);
 
-  // 2. Agrupado greedy de piezas hasta el objetivo, arrastrando la cola
-  //    del chunk anterior como solapamiento.
+  // 2. Greedy grouping of pieces up to the target, carrying the tail of
+  //    the previous chunk as overlap.
   const chunks: TextChunk[] = [];
   let current = '';
 
@@ -58,13 +64,13 @@ function splitIntoPieces(text: string): string[] {
       pieces.push(trimmed);
       continue;
     }
-    // Párrafo más largo que un chunk: separar por oraciones.
+    // Paragraph longer than a chunk: split by sentences.
     for (const sentence of trimmed.split(/(?<=[.!?])\s+/)) {
       if (sentence.length <= CHUNK_TARGET_CHARS) {
         if (sentence.length > 0) pieces.push(sentence);
         continue;
       }
-      // Oración gigante (texto sin puntuación): hard-split.
+      // Giant sentence (unpunctuated text): hard-split.
       for (let i = 0; i < sentence.length; i += CHUNK_TARGET_CHARS) {
         pieces.push(sentence.slice(i, i + CHUNK_TARGET_CHARS));
       }
@@ -73,7 +79,7 @@ function splitIntoPieces(text: string): string[] {
   return pieces;
 }
 
-// Cola del chunk anterior para solapar, cortada en límite de palabra.
+/** Tail of the previous chunk used as overlap, cut at a word boundary. */
 function overlapTail(chunk: string): string {
   if (chunk.length <= CHUNK_OVERLAP_CHARS) return chunk;
   const tail = chunk.slice(-CHUNK_OVERLAP_CHARS);

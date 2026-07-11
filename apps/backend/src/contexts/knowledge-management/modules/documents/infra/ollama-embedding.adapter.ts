@@ -7,10 +7,11 @@ interface OllamaEmbedResponse {
   embeddings: number[][];
 }
 
-// Ollama procesa el batch entero en una request; se trocea igual para no
-// mandar payloads gigantes con documentos largos.
+// Ollama handles the whole batch in one request; it is still sliced to
+// avoid huge payloads with long documents.
 const BATCH_SIZE = 64;
 
+/** Embeddings adapter for a local Ollama server (/api/embed). */
 export class OllamaEmbeddingAdapter implements EmbeddingProviderPort {
   constructor(
     private readonly baseUrl: string,

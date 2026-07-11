@@ -1,5 +1,5 @@
-// El import profundo evita el bloque de debug del index de pdf-parse v1;
-// los tipos son los mismos que expone @types/pdf-parse para el módulo raíz.
+// The deep import avoids the debug block in pdf-parse v1's index; the
+// types are the same ones @types/pdf-parse exposes for the root module.
 declare module 'pdf-parse/lib/pdf-parse.js' {
   import pdfParse from 'pdf-parse';
   export default pdfParse;

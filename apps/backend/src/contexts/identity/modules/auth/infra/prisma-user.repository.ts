@@ -6,8 +6,10 @@ import type {
   UserRepositoryPort,
 } from '../ports/user-repository.port';
 
-// El email es CITEXT en la base: la comparación de igualdad ya es
-// case-insensitive a nivel de Postgres.
+/**
+ * Prisma-backed user store. The email column is CITEXT in Postgres, so
+ * equality comparison is already case-insensitive at the database level.
+ */
 export class PrismaUserRepository implements UserRepositoryPort {
   async findByEmail(email: string): Promise<UserRecord | null> {
     const user = await prisma.user.findFirst({

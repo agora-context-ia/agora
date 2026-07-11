@@ -17,9 +17,11 @@ interface OrganizationMenuProps {
   onRequestExpand: () => void;
 }
 
-// Menú desplegable (accordion) de organizaciones para el sidebar izquierdo.
-// Con el sidebar colapsado queda solo el icono: al hacer click se expande
-// el sidebar y se abre el menú.
+/**
+ * Organization accordion menu for the left sidebar. When the sidebar is
+ * collapsed only the icon remains: clicking expands the sidebar and
+ * opens the menu.
+ */
 export function OrganizationMenu({ collapsed, onRequestExpand }: OrganizationMenuProps) {
   const [open, setOpen] = useState(true);
   const { organizations, isLoading } = useOrganizationList();

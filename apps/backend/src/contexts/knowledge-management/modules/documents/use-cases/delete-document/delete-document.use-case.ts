@@ -8,10 +8,12 @@ import type { DocumentRepositoryPort } from '../../ports/document-repository.por
 import type { EmbeddingRepositoryPort } from '../../ports/embedding-repository.port';
 import type { SpaceAccessPort } from '../../ports/space-access.port';
 
+/** Deletes a stored file from disk/storage. */
 export interface FileRemoverPort {
   remove(relativePath: string): Promise<void>;
 }
 
+/** Soft-deletes a document and hard-deletes its derived data and file. */
 export class DeleteDocumentUseCase {
   constructor(
     private readonly documents: DocumentRepositoryPort,
@@ -36,8 +38,8 @@ export class DeleteDocumentUseCase {
     const document = await this.documents.findById(documentId);
     if (!document || document.spaceId !== spaceId) throw new DocumentNotFoundError();
 
-    // Documento y fuente: soft delete. Chunks/embeddings (derivados) y el
-    // archivo físico: borrado real.
+    // Document and source: soft delete. Chunks/embeddings (derived data)
+    // and the physical file: hard delete.
     await this.documents.softDelete(documentId);
     await this.embeddings.deleteForSource(document.sourceId);
     if (document.filePath) await this.fileRemover.remove(document.filePath);

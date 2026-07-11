@@ -23,6 +23,7 @@ function readSessionToken(req: Request): string | null {
   return typeof token === 'string' && token.length > 0 ? token : null;
 }
 
+/** Registration, login, logout, current-user and profile routes. */
 export const authRouter: Router = Router();
 
 authRouter.post('/register', async (req: Request, res: Response) => {

@@ -1,3 +1,4 @@
+/** Task type for a chat question; selects the backend prompt template. */
 export type ChatMode =
   | 'general'
   | 'explain-process'
@@ -7,12 +8,14 @@ export type ChatMode =
   | 'detect-contradictions'
   | 'acceptance-criteria';
 
+/** Selectable mode with its UI label and description. */
 export interface ChatModeOption {
   value: ChatMode;
   label: string;
   description: string;
 }
 
+/** All chat modes offered by the ModeSelector. */
 export const CHAT_MODES: ChatModeOption[] = [
   { value: 'general', label: 'Consulta general', description: 'Preguntas libres sobre la documentación del proyecto.' },
   { value: 'explain-process', label: 'Explicar proceso', description: 'Describe paso a paso cómo funciona un proceso.' },

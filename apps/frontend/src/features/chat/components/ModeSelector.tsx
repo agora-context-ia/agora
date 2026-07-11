@@ -13,6 +13,7 @@ interface ModeSelectorProps {
   onModeChange: (mode: ChatMode) => void;
 }
 
+/** Dropdown to pick the task type (mode) of the next question. */
 export function ModeSelector({ mode, onModeChange }: ModeSelectorProps) {
   const activeMode = CHAT_MODES.find((option) => option.value === mode) ?? CHAT_MODES[0];
 

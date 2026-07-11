@@ -9,6 +9,7 @@ import type { SessionRepositoryPort } from '../../ports/session-repository.port'
 import type { UserRepositoryPort } from '../../ports/user-repository.port';
 import type { AuthSessionResult } from '../register-user/register-user.use-case';
 
+/** Login credentials as submitted by the form. */
 export interface LoginUserInput {
   email: string;
   password: string;
@@ -16,6 +17,11 @@ export interface LoginUserInput {
   userAgent?: string;
 }
 
+/**
+ * Verifies credentials and opens a new session.
+ * Returns the same InvalidCredentialsError for unknown email and wrong
+ * password, so the response does not reveal which one failed.
+ */
 export class LoginUserUseCase {
   constructor(
     private readonly users: UserRepositoryPort,

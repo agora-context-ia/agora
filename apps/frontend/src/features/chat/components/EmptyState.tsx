@@ -5,6 +5,7 @@ interface EmptyStateProps {
   projectName?: string;
 }
 
+/** Placeholder for no-project / no-conversation states. */
 export function EmptyState({ variant, projectName }: EmptyStateProps) {
   if (variant === 'no-project') {
     return (

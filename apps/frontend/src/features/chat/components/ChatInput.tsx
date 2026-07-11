@@ -15,6 +15,7 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
+/** Message composer with mode and model selectors. */
 export function ChatInput({ mode, onModeChange, model, onModelChange, onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState('');
 

@@ -1,11 +1,14 @@
 import mammoth from 'mammoth';
-// Import profundo: el index de pdf-parse v1 trae código de debug que se
-// ejecuta al cargar el módulo fuera de CommonJS puro.
+// Deep import: pdf-parse v1's index ships debug code that runs on module
+// load outside pure CommonJS.
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { UnsupportedFileTypeError } from '../domain/document';
+import type { TextExtractionPort } from '../ports/text-extraction.port';
 
-// MIME types aceptados y su extractor. La whitelist también la usa multer
-// (rechazo temprano con 415 antes de guardar nada).
+/**
+ * Accepted MIME types. The whitelist is also used by multer for early
+ * rejection with 415 before anything is stored.
+ */
 export const SUPPORTED_MIME_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
@@ -15,10 +18,21 @@ export const SUPPORTED_MIME_TYPES = [
   'application/json',
 ] as const;
 
+/** Whether an extractor exists for the given MIME type. */
 export function isSupportedMimeType(mimeType: string): boolean {
   return (SUPPORTED_MIME_TYPES as readonly string[]).includes(mimeType);
 }
 
+/** {@link TextExtractionPort} adapter backed by pdf-parse, mammoth and utf-8 decoding. */
+export const fileTextExtractor: TextExtractionPort = {
+  isSupported: isSupportedMimeType,
+  extract: extractText,
+};
+
+/**
+ * Extracts plain text from an uploaded file.
+ * @throws UnsupportedFileTypeError when the MIME type has no extractor.
+ */
 export async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
   switch (mimeType) {
     case 'application/pdf': {

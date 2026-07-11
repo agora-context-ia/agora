@@ -3,6 +3,7 @@ import { ApiError } from '@/lib/api';
 import { organizationApiAdapter } from '../infra/http-organization-api.adapter';
 import { useOrganizationStore } from './use-active-organization';
 
+/** Creates an organization and activates it; exposes submit state and error. */
 export function useCreateOrganization() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +14,7 @@ export function useCreateOrganization() {
     setError(null);
     try {
       const organization = await organizationApiAdapter.create({ name });
-      // Queda como organización activa (addOrganization setea el id activo).
+      // Becomes the active organization (addOrganization sets the active id).
       addOrganization(organization);
       return true;
     } catch (err) {

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { authApiAdapter } from '../infra/http-auth-api.adapter';
 import { useAuthStore } from './use-auth';
 
+/** Restores the session from the cookie on first load; exposes the user. */
 export function useCurrentUser() {
   const user = useAuthStore((state) => state.user);
   const isLoading = useAuthStore((state) => state.isLoading);
@@ -23,7 +24,7 @@ export function useCurrentUser() {
       })
       .catch(() => {
         if (cancelled) return;
-        // Backend caído o error de red: se trata como "sin sesión".
+        // Backend down or network error: treated as "no session".
         setUser(null);
       })
       .finally(() => {

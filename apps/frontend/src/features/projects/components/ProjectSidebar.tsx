@@ -1,19 +1,19 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useOrganizationStore } from '@/features/organizations/application/use-active-organization';
+import { useActiveOrganizationId } from '@/features/organizations/application/use-active-organization';
 import { useProjectList } from '../application/use-project-list';
 import { useProjectStore } from '../application/use-active-project';
 import { ProjectListItem } from './ProjectListItem';
 import { CreateProjectDialog } from './CreateProjectDialog';
 
+/** Sidebar section listing the active organization's projects. */
 export function ProjectSidebar() {
   const { projects, isLoading } = useProjectList();
   const activeProjectId = useProjectStore((state) => state.activeProjectId);
   const setActiveProject = useProjectStore((state) => state.setActiveProject);
-  const activeOrganizationId = useOrganizationStore((state) => state.activeOrganizationId);
+  const activeOrganizationId = useActiveOrganizationId();
 
-  // Los espacios se filtran por la organización activa (menú de
-  // organizaciones del sidebar izquierdo): cada espacio pertenece a una
-  // única organización.
+  // Spaces are filtered by the active organization (organization menu in
+  // the left sidebar): each space belongs to exactly one organization.
   const visibleProjects = projects.filter((project) => project.organizationId === activeOrganizationId);
 
   return (

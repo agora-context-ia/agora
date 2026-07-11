@@ -1,7 +1,8 @@
-// Cliente HTTP mínimo hacia el backend. La sesión viaja en una cookie
-// httpOnly, por eso todas las requests llevan credentials: 'include'.
+// Minimal HTTP client towards the backend. The session travels in an
+// httpOnly cookie, hence every request carries credentials: 'include'.
 const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
+/** HTTP error from the backend, carrying the status and server message. */
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -13,8 +14,8 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  // Con FormData el browser arma solo el Content-Type (incluye el boundary
-  // del multipart): forzar application/json lo rompería.
+  // With FormData the browser builds the Content-Type itself (including
+  // the multipart boundary): forcing application/json would break it.
   const isFormData = init?.body instanceof FormData;
   const response = await fetch(`${API_URL}${path}`, {
     credentials: 'include',

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { create } from 'zustand';
-import { mockChatApiAdapter } from '../infra/mock-chat-api.adapter';
+import { chatApiAdapter } from '../infra/http-chat-api.adapter';
 import type { Message } from '../domain/message';
 
 interface ChatStoreState {
@@ -8,7 +8,7 @@ interface ChatStoreState {
   loadedProjectIds: Set<string>;
   isLoading: boolean;
   isSending: boolean;
-  loadConversation: (projectId: string) => Promise<void>;
+  loadConversation: (organizationId: string, projectId: string) => Promise<void>;
   appendMessage: (projectId: string, message: Message) => void;
   setSending: (isSending: boolean) => void;
 }
@@ -18,17 +18,22 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   loadedProjectIds: new Set(),
   isLoading: false,
   isSending: false,
-  loadConversation: async (projectId: string) => {
+  loadConversation: async (organizationId: string, projectId: string) => {
     if (get().loadedProjectIds.has(projectId)) return;
 
     set({ isLoading: true });
-    const conversation = await mockChatApiAdapter.getHistory(projectId);
+    let messages: Message[] = [];
+    try {
+      messages = await chatApiAdapter.getHistory(organizationId, projectId);
+    } catch {
+      // Sin historial disponible (backend caído o error): chat vacío.
+    }
 
     set((state) => ({
       isLoading: false,
       messagesByProject: {
         ...state.messagesByProject,
-        [projectId]: conversation?.messages ?? [],
+        [projectId]: messages,
       },
       loadedProjectIds: new Set(state.loadedProjectIds).add(projectId),
     }));
@@ -43,17 +48,17 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   setSending: (isSending) => set({ isSending }),
 }));
 
-export function useConversation(projectId: string | null) {
+export function useConversation(organizationId: string | null, projectId: string | null) {
   const messagesByProject = useChatStore((state) => state.messagesByProject);
   const isLoading = useChatStore((state) => state.isLoading);
   const isSending = useChatStore((state) => state.isSending);
   const loadConversation = useChatStore((state) => state.loadConversation);
 
   useEffect(() => {
-    if (projectId) {
-      loadConversation(projectId);
+    if (organizationId && projectId) {
+      loadConversation(organizationId, projectId);
     }
-  }, [projectId, loadConversation]);
+  }, [organizationId, projectId, loadConversation]);
 
   const messages = projectId ? (messagesByProject[projectId] ?? []) : [];
 

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Building2, Check, ChevronDown } from 'lucide-react';
+import { Building2, Check, ChevronDown, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useOrganizationList } from '../application/use-organization-list';
 import { useActiveOrganization, useOrganizationStore } from '../application/use-active-organization';
+import { CreateOrganizationDialog } from './CreateOrganizationDialog';
 
 const roleLabel: Record<string, string> = {
   owner: 'Dueño',
@@ -85,6 +86,17 @@ export function OrganizationMenu({ collapsed, onRequestExpand }: OrganizationMen
               </button>
             );
           })}
+          <CreateOrganizationDialog
+            trigger={
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent"
+              >
+                <Plus className="h-4 w-4 shrink-0" />
+                Crear organización
+              </button>
+            }
+          />
         </div>
       )}
     </div>

@@ -42,6 +42,7 @@ model User {
   spacesCreated          Space[]                  @relation("SpaceCreatedBy")
   conversations          Conversation[]
   aiUsageLogs            AiUsageLog[]
+  aiCredentialsCreated   AiProviderCredential[]   @relation("AiProviderCredentialCreatedBy")
 
   @@map("users")
   @@schema("security")
@@ -123,14 +124,40 @@ model Organization {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  creator     User                      @relation("OrganizationCreatedBy", fields: [createdBy], references: [id])
-  members     OrganizationMember[]
-  invitations OrganizationInvitation[]
-  spaces      Space[]
-  tags        Tag[]
-  aiUsageLogs AiUsageLog[]
+  creator       User                      @relation("OrganizationCreatedBy", fields: [createdBy], references: [id])
+  members       OrganizationMember[]
+  invitations   OrganizationInvitation[]
+  spaces        Space[]
+  tags          Tag[]
+  aiUsageLogs   AiUsageLog[]
+  aiCredentials AiProviderCredential[]
 
   @@map("organizations")
+  @@schema("main")
+}
+
+// API keys de proveedores de IA (Gemini, etc.) a nivel organización.
+// A diferencia de security.api_keys (PATs propios, hash irreversible),
+// acá la key se guarda cifrada (AES-256-GCM con CREDENTIALS_ENCRYPTION_KEY)
+// porque hay que poder desencriptarla para llamar al proveedor. Nunca se
+// devuelve por HTTP: el frontend solo ve api_key_last_four.
+model AiProviderCredential {
+  id              String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  provider        String    @db.VarChar(30) // 'gemini' por ahora
+  apiKeyEncrypted String    @map("api_key_encrypted")
+  apiKeyLastFour  String    @map("api_key_last_four") @db.VarChar(4)
+  createdBy       String    @map("created_by") @db.Uuid
+  status          Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  creator      User         @relation("AiProviderCredentialCreatedBy", fields: [createdBy], references: [id])
+
+  @@unique([organizationId, provider])
+  @@map("ai_provider_credentials")
   @@schema("main")
 }
 

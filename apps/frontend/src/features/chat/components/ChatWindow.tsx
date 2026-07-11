@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useActiveOrganization } from '@/features/organizations/application/use-active-organization';
 import { useActiveProject } from '@/features/projects/application/use-active-project';
 import { useConversation } from '../application/use-conversation';
 import { useSendMessage } from '../application/use-send-message';
@@ -8,10 +9,15 @@ import { EmptyState } from './EmptyState';
 import { MessageList } from './MessageList';
 
 export function ChatWindow() {
+  const activeOrganization = useActiveOrganization();
   const activeProject = useActiveProject();
-  const { messages, isLoading, isSending } = useConversation(activeProject?.id ?? null);
-  const { sendMessage } = useSendMessage(activeProject?.id ?? null);
+  const { messages, isLoading, isSending } = useConversation(
+    activeOrganization?.id ?? null,
+    activeProject?.id ?? null,
+  );
+  const { sendMessage } = useSendMessage(activeOrganization?.id ?? null, activeProject?.id ?? null);
   const [mode, setMode] = useState<ChatMode>('general');
+  const [model, setModel] = useState<string | null>(null);
 
   if (!activeProject) {
     return (
@@ -38,7 +44,14 @@ export function ChatWindow() {
         </div>
       )}
 
-      <ChatInput mode={mode} onModeChange={setMode} onSend={(content) => sendMessage(content, mode)} disabled={isSending} />
+      <ChatInput
+        mode={mode}
+        onModeChange={setMode}
+        model={model}
+        onModelChange={setModel}
+        onSend={(content) => sendMessage(content, mode, model)}
+        disabled={isSending}
+      />
     </div>
   );
 }

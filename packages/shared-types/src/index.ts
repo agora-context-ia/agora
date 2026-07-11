@@ -85,6 +85,69 @@ export interface SemanticSearchHitDto {
 }
 
 // ---------------------------------------------------------------------
+// Configuración de IA por organización. La API key nunca viaja completa
+// hacia el frontend: solo apiKeyLastFour.
+// ---------------------------------------------------------------------
+
+export type AiProviderDto = 'gemini';
+
+export interface AiModelOptionDto {
+  value: string;
+  label: string;
+}
+
+export interface AiProviderSettingDto {
+  provider: AiProviderDto;
+  label: string;
+  models: AiModelOptionDto[];
+  configured: boolean;
+  apiKeyLastFour: string | null;
+  updatedAt: string | null;
+}
+
+export interface SaveAiProviderKeyDto {
+  apiKey: string;
+}
+
+// ---------------------------------------------------------------------
+// Chat sobre la documentación de un espacio
+// ---------------------------------------------------------------------
+
+export type ChatRoleDto = 'user' | 'assistant';
+
+export interface ChatSourceDto {
+  documentName: string;
+  fragment: string;
+  relevance: number;
+}
+
+export interface ChatMessageDto {
+  id: string;
+  role: ChatRoleDto;
+  content: string;
+  createdAt: string;
+}
+
+export interface SendChatMessageDto {
+  content: string;
+  mode: string;
+  model: string | null;
+}
+
+export interface SendChatMessageResponseDto {
+  message: ChatMessageDto;
+  sources: ChatSourceDto[];
+}
+
+// ---------------------------------------------------------------------
+// Perfil de usuario
+// ---------------------------------------------------------------------
+
+export interface UpdateProfileDto {
+  fullName: string;
+}
+
+// ---------------------------------------------------------------------
 // Catálogos (schema parameters). El code es el contrato estable.
 // ---------------------------------------------------------------------
 

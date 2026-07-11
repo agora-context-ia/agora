@@ -1,6 +1,7 @@
 import { prisma } from '../../../../../infrastructure/persistence/prisma-client';
 import type {
   CreateUserInput,
+  UpdateProfileData,
   UserRecord,
   UserRepositoryPort,
 } from '../ports/user-repository.port';
@@ -38,6 +39,14 @@ export class PrismaUserRepository implements UserRepositoryPort {
       where: { id: userId },
       data: { lastLoginAt: new Date() },
     });
+  }
+
+  async updateProfile(userId: string, data: UpdateProfileData): Promise<UserRecord> {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { fullName: data.fullName },
+    });
+    return toRecord(user);
   }
 }
 

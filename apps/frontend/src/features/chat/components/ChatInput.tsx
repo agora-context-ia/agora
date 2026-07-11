@@ -3,16 +3,19 @@ import { ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ModeSelector } from './ModeSelector';
+import { ModelSelector } from './ModelSelector';
 import type { ChatMode } from '../domain/mode';
 
 interface ChatInputProps {
   mode: ChatMode;
   onModeChange: (mode: ChatMode) => void;
+  model: string | null;
+  onModelChange: (model: string | null) => void;
   onSend: (content: string) => void;
   disabled?: boolean;
 }
 
-export function ChatInput({ mode, onModeChange, onSend, disabled }: ChatInputProps) {
+export function ChatInput({ mode, onModeChange, model, onModelChange, onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState('');
 
   const handleSend = () => {
@@ -40,7 +43,10 @@ export function ChatInput({ mode, onModeChange, onSend, disabled }: ChatInputPro
           disabled={disabled}
         />
         <div className="flex items-center justify-between px-1 pb-1 pt-1">
-          <ModeSelector mode={mode} onModeChange={onModeChange} />
+          <div className="flex items-center gap-1.5">
+            <ModeSelector mode={mode} onModeChange={onModeChange} />
+            <ModelSelector model={model} onModelChange={onModelChange} />
+          </div>
           <Button size="icon" onClick={handleSend} disabled={disabled || !value.trim()}>
             <ArrowUp className="h-4 w-4" />
           </Button>

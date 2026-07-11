@@ -2,6 +2,7 @@ import { Bot, User } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { Message } from '../domain/message';
+import { MarkdownContent } from './MarkdownContent';
 import { SourcesFootnote } from './SourcesFootnote';
 
 interface MessageBubbleProps {
@@ -21,7 +22,13 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-muted-foreground">{isAssistant ? 'ContextHub AI' : 'Vos'}</p>
-        <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{message.content}</p>
+        {isAssistant ? (
+          <div className="mt-1">
+            <MarkdownContent content={message.content} />
+          </div>
+        ) : (
+          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{message.content}</p>
+        )}
         {message.sources && <SourcesFootnote sources={message.sources} />}
       </div>
     </div>

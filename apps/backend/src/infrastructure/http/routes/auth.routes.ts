@@ -92,3 +92,17 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
 authRouter.get('/me', requireAuth, (req: Request, res: Response) => {
   return res.json({ user: req.authUser });
 });
+
+authRouter.patch('/me', requireAuth, async (req: Request, res: Response) => {
+  const { fullName } = (req.body ?? {}) as Record<string, unknown>;
+
+  if (typeof fullName !== 'string' || fullName.trim().length < 2) {
+    return res.status(400).json({ error: 'El nombre debe tener al menos 2 caracteres' });
+  }
+
+  const user = await container.updateProfile.execute({
+    userId: req.userId!,
+    fullName: fullName.trim(),
+  });
+  return res.json({ user });
+});

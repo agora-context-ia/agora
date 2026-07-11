@@ -3,6 +3,7 @@ import { ChatWindow } from '@/features/chat/components/ChatWindow';
 import { OnboardingScreen } from '@/features/organizations/components/OnboardingScreen';
 import { useOrganizationList } from '@/features/organizations/application/use-organization-list';
 import { ProjectSidebar } from '@/features/projects/components/ProjectSidebar';
+import { SettingsDialog } from '@/features/settings/components/SettingsDialog';
 
 export function AppShell() {
   const { organizations, hasLoaded } = useOrganizationList();
@@ -29,6 +30,7 @@ export function AppShell() {
       <aside className="w-[300px] shrink-0 border-l">
         <ProjectSidebar />
       </aside>
+      <SettingsDialog />
     </div>
   );
 }

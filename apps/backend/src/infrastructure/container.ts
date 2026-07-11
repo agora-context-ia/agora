@@ -1,5 +1,10 @@
 // Wiring manual de dependencias (composition root). Si el grafo crece,
 // migrar a awilix o similar.
+import { GeminiLlmAdapter } from '../contexts/ai/modules/chat/infra/gemini-llm.adapter';
+import { OrgCredentialLlmKeyAdapter } from '../contexts/ai/modules/chat/infra/org-credential-llm-key.adapter';
+import { PrismaConversationRepository } from '../contexts/ai/modules/chat/infra/prisma-conversation.repository';
+import { GetChatHistoryUseCase } from '../contexts/ai/modules/chat/use-cases/get-chat-history/get-chat-history.use-case';
+import { SendChatMessageUseCase } from '../contexts/ai/modules/chat/use-cases/send-chat-message/send-chat-message.use-case';
 import { BcryptPasswordHasher } from '../contexts/identity/modules/auth/infra/bcrypt-password-hasher';
 import { PrismaSessionRepository } from '../contexts/identity/modules/auth/infra/prisma-session.repository';
 import { PrismaUserRepository } from '../contexts/identity/modules/auth/infra/prisma-user.repository';
@@ -7,6 +12,12 @@ import { GetCurrentUserUseCase } from '../contexts/identity/modules/auth/use-cas
 import { LoginUserUseCase } from '../contexts/identity/modules/auth/use-cases/login-user/login-user.use-case';
 import { LogoutUserUseCase } from '../contexts/identity/modules/auth/use-cases/logout-user/logout-user.use-case';
 import { RegisterUserUseCase } from '../contexts/identity/modules/auth/use-cases/register-user/register-user.use-case';
+import { UpdateProfileUseCase } from '../contexts/identity/modules/auth/use-cases/update-profile/update-profile.use-case';
+import { AesCredentialCipher } from '../contexts/identity/modules/ai-credentials/infra/aes-credential-cipher';
+import { PrismaAiCredentialRepository } from '../contexts/identity/modules/ai-credentials/infra/prisma-ai-credential.repository';
+import { PrismaOrganizationRoleAdapter } from '../contexts/identity/modules/ai-credentials/infra/prisma-organization-role.adapter';
+import { ListProviderCredentialsUseCase } from '../contexts/identity/modules/ai-credentials/use-cases/list-provider-credentials/list-provider-credentials.use-case';
+import { SaveProviderCredentialUseCase } from '../contexts/identity/modules/ai-credentials/use-cases/save-provider-credential/save-provider-credential.use-case';
 import { PrismaOrganizationRepository } from '../contexts/identity/modules/organizations/infra/prisma-organization.repository';
 import { CreateOrganizationUseCase } from '../contexts/identity/modules/organizations/use-cases/create-organization/create-organization.use-case';
 import { ListMyOrganizationsUseCase } from '../contexts/identity/modules/organizations/use-cases/list-my-organizations/list-my-organizations.use-case';
@@ -45,6 +56,10 @@ const passwordHasher = new BcryptPasswordHasher();
 
 const organizationRepository = new PrismaOrganizationRepository();
 
+const aiCredentialRepository = new PrismaAiCredentialRepository();
+const organizationRole = new PrismaOrganizationRoleAdapter();
+const credentialCipher = new AesCredentialCipher(env.CREDENTIALS_ENCRYPTION_KEY);
+
 const spaceRepository = new PrismaSpaceRepository();
 const organizationMembership = new PrismaOrganizationMembershipAdapter();
 
@@ -72,16 +87,34 @@ function createEmbeddingProvider(): EmbeddingProviderPort {
 
 const embeddingProvider = createEmbeddingProvider();
 
+const conversationRepository = new PrismaConversationRepository();
+const llmProvider = new GeminiLlmAdapter();
+const llmCredentials = new OrgCredentialLlmKeyAdapter(aiCredentialRepository, credentialCipher, {
+  gemini: env.GEMINI_API_KEY,
+});
+
 export const container = {
   // identity/auth
   registerUser: new RegisterUserUseCase(userRepository, sessionRepository, passwordHasher),
   loginUser: new LoginUserUseCase(userRepository, sessionRepository, passwordHasher),
   logoutUser: new LogoutUserUseCase(sessionRepository),
   getCurrentUser: new GetCurrentUserUseCase(userRepository, sessionRepository),
+  updateProfile: new UpdateProfileUseCase(userRepository),
 
   // identity/organizations
   createOrganization: new CreateOrganizationUseCase(organizationRepository),
   listMyOrganizations: new ListMyOrganizationsUseCase(organizationRepository),
+
+  // identity/ai-credentials
+  saveProviderCredential: new SaveProviderCredentialUseCase(
+    organizationRole,
+    aiCredentialRepository,
+    credentialCipher,
+  ),
+  listProviderCredentials: new ListProviderCredentialsUseCase(
+    organizationRole,
+    aiCredentialRepository,
+  ),
 
   // knowledge-management/projects (spaces)
   createSpace: new CreateSpaceUseCase(spaceRepository, organizationMembership),
@@ -126,6 +159,22 @@ export const container = {
     embeddingProvider,
     organizationMembership,
     spaceAccess,
+  ),
+
+  // ai/chat
+  sendChatMessage: new SendChatMessageUseCase(
+    organizationMembership,
+    spaceAccess,
+    conversationRepository,
+    llmCredentials,
+    llmProvider,
+    embeddingProvider,
+    embeddingRepository,
+  ),
+  getChatHistory: new GetChatHistoryUseCase(
+    organizationMembership,
+    spaceAccess,
+    conversationRepository,
   ),
 
   // parameters/catalogs

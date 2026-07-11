@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, LogOut, Moon, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, Moon, Settings, Sun } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { OrganizationMenu } from '@/features/organizations/components/OrganizationMenu';
+import { useSettingsDialog } from '@/features/settings/application/use-settings-dialog';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/use-theme';
 import { useCurrentUser } from '../application/use-current-user';
@@ -22,6 +23,7 @@ export function UserSidebar() {
   const { user } = useCurrentUser();
   const { logout, isLoggingOut } = useLogout();
   const { theme, toggleTheme } = useTheme();
+  const openSettings = useSettingsDialog((state) => state.open);
 
   return (
     <aside
@@ -64,6 +66,15 @@ export function UserSidebar() {
       </nav>
 
       <div className={cn('flex border-t p-3', collapsed ? 'flex-col gap-1' : 'flex-col gap-1')}>
+        <Button
+          variant="ghost"
+          onClick={() => openSettings()}
+          className={cn('w-full text-muted-foreground', collapsed ? 'justify-center px-0' : 'justify-start gap-2')}
+        >
+          <Settings className="h-4 w-4" />
+          {!collapsed && <span>Configuración</span>}
+        </Button>
+
         <Button
           variant="ghost"
           onClick={toggleTheme}

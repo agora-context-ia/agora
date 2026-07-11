@@ -93,7 +93,7 @@ export class SendChatMessageUseCase {
 
     return {
       message: assistantMessage,
-      sources: context.map((source) => ({
+      sources: dedupeByDocument(context).map((source) => ({
         ...source,
         fragment:
           source.fragment.length > SOURCE_FRAGMENT_PREVIEW
@@ -124,6 +124,18 @@ export class SendChatMessageUseCase {
       return [];
     }
   }
+}
+
+// Al prompt van todos los fragmentos recuperados, pero como fuente la UI
+// muestra una entrada por documento: la de mayor relevancia (los hits ya
+// vienen ordenados por score descendente).
+function dedupeByDocument(sources: ChatSource[]): ChatSource[] {
+  const seen = new Set<string>();
+  return sources.filter((source) => {
+    if (seen.has(source.documentName)) return false;
+    seen.add(source.documentName);
+    return true;
+  });
 }
 
 // El modelo elegido define el proveedor (por ahora solo Gemini). Sin

@@ -191,6 +191,26 @@ describe('SendChatMessageUseCase', () => {
     expect(result.sources[0]).toMatchObject({ documentName: 'Manual.pdf', relevance: 0.91 });
   });
 
+  it('deduplica las fuentes por documento aunque haya varios fragmentos del mismo', async () => {
+    const { useCase, llm, embeddings } = setup();
+    embeddings.hits = [
+      { documentId: 'doc-1', fileName: 'Manual.pdf', chunkIndex: 0, content: 'Fragmento A', score: 0.9 },
+      { documentId: 'doc-1', fileName: 'Manual.pdf', chunkIndex: 3, content: 'Fragmento B', score: 0.8 },
+      { documentId: 'doc-2', fileName: 'Anexo.pdf', chunkIndex: 1, content: 'Fragmento C', score: 0.7 },
+      { documentId: 'doc-1', fileName: 'Manual.pdf', chunkIndex: 7, content: 'Fragmento D', score: 0.6 },
+    ];
+
+    const result = await useCase.execute(BASE_INPUT);
+
+    // Al prompt van los 4 fragmentos; como fuentes, uno por documento con
+    // el fragmento de mayor relevancia.
+    expect(llm.lastInput?.systemPrompt).toContain('Fragmento B');
+    expect(llm.lastInput?.systemPrompt).toContain('Fragmento D');
+    expect(result.sources).toHaveLength(2);
+    expect(result.sources[0]).toMatchObject({ documentName: 'Manual.pdf', relevance: 0.9 });
+    expect(result.sources[1]).toMatchObject({ documentName: 'Anexo.pdf', relevance: 0.7 });
+  });
+
   it('sigue funcionando sin contexto si el proveedor de embeddings falla', async () => {
     const { useCase, embeddingProvider } = setup();
     embeddingProvider.shouldFail = true;

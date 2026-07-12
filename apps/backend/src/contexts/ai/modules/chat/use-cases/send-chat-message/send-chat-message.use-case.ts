@@ -1,4 +1,8 @@
-import { AI_PROVIDER_CATALOG } from '../../../../../../shared/ai-provider-catalog';
+import {
+  AI_PROVIDER_CATALOG,
+  AI_PROVIDERS,
+  type AiProvider,
+} from '../../../../../../shared/ai-provider-catalog';
 import {
   AiProviderNotConfiguredError,
   ConversationNotFoundError,
@@ -12,6 +16,7 @@ import {
   type Conversation,
 } from '../../domain/chat';
 import { buildSystemPrompt } from '../../domain/chat-prompts';
+import { MODE_RETRIEVAL, type RetrievalProfile } from '../../domain/chat-retrieval';
 import type { ContextSearchPort } from '../../ports/context-search.port';
 import type { ConversationRepositoryPort } from '../../ports/conversation-repository.port';
 import type { LlmCredentialPort } from '../../ports/llm-credential.port';
@@ -41,8 +46,7 @@ export interface SendChatMessageResult {
   sources: ChatSource[];
 }
 
-/** Documentation fragments injected as context and prior messages sent as history. */
-const CONTEXT_CHUNKS = 5;
+/** Prior messages sent as conversation history. */
 const HISTORY_MESSAGES = 12;
 /** Full fragments go into the prompt; the UI receives a short preview. */
 const SOURCE_FRAGMENT_PREVIEW = 300;
@@ -84,16 +88,22 @@ export class SendChatMessageUseCase {
     const { provider, model } = resolveModel(input.model);
     const mode = isChatMode(input.mode) ? input.mode : 'general';
 
-    const apiKey = await this.llmCredentials.getApiKey(input.organizationId, provider);
-    if (!apiKey) throw new AiProviderNotConfiguredError();
+    // Keyless providers (e.g. local Ollama) skip the credential check: the
+    // server is part of the deployment, not a paid third-party account.
+    const requiresApiKey = AI_PROVIDER_CATALOG[provider].requiresApiKey;
+    const apiKey = requiresApiKey
+      ? await this.llmCredentials.getApiKey(input.organizationId, provider)
+      : '';
+    if (requiresApiKey && !apiKey) throw new AiProviderNotConfiguredError();
 
-    const context = await this.retrieveContext(input.spaceId, input.content);
+    const context = await this.retrieveContext(input.spaceId, input.content, MODE_RETRIEVAL[mode]);
 
     const conversation = await this.resolveConversation(input);
     const history = await this.conversations.listMessages(conversation.id, HISTORY_MESSAGES);
 
     const reply = await this.llm.generate({
-      apiKey,
+      provider,
+      apiKey: apiKey ?? '',
       model,
       systemPrompt: buildSystemPrompt(mode, context),
       history: history.map((message) => ({ role: message.role, content: message.content })),
@@ -166,13 +176,17 @@ export class SendChatMessageUseCase {
   }
 
   /**
-   * Semantic search over the space. If retrieval is unavailable (e.g.
-   * Ollama down in local dev) the chat continues without context instead
-   * of failing.
+   * Semantic search over the space, sized by the mode's retrieval
+   * profile. If retrieval is unavailable (e.g. Ollama down in local dev)
+   * the chat continues without context instead of failing.
    */
-  private async retrieveContext(spaceId: string, query: string): Promise<ChatSource[]> {
+  private async retrieveContext(
+    spaceId: string,
+    query: string,
+    profile: RetrievalProfile,
+  ): Promise<ChatSource[]> {
     try {
-      return await this.contextSearch.search(spaceId, query, CONTEXT_CHUNKS);
+      return await this.contextSearch.search(spaceId, query, profile.chunks, profile.minRelevance);
     } catch {
       return [];
     }
@@ -194,18 +208,18 @@ function dedupeByDocument(sources: ChatSource[]): ChatSource[] {
 }
 
 /**
- * The chosen model determines the provider (only Gemini for now). Without
- * an explicit model the first catalog entry is used.
+ * The chosen model determines the provider. Without an explicit model the
+ * first Gemini catalog entry is used (historical default).
  *
  * @throws UnknownChatModelError when the model is not in the catalog.
  */
-function resolveModel(requested: string | null): { provider: string; model: string } {
+function resolveModel(requested: string | null): { provider: AiProvider; model: string } {
   if (requested === null || requested === '') {
     return { provider: 'gemini', model: AI_PROVIDER_CATALOG.gemini.models[0].value };
   }
 
-  for (const [provider, catalog] of Object.entries(AI_PROVIDER_CATALOG)) {
-    if (catalog.models.some((model) => model.value === requested)) {
+  for (const provider of AI_PROVIDERS) {
+    if (AI_PROVIDER_CATALOG[provider].models.some((model) => model.value === requested)) {
       return { provider, model: requested };
     }
   }

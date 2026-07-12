@@ -242,11 +242,34 @@ describe('SendChatMessageUseCase', () => {
     const { useCase, llm } = setup();
 
     await expect(
-      useCase.execute({ ...BASE_INPUT, model: 'gpt-4o' }),
+      useCase.execute({ ...BASE_INPUT, model: 'modelo-inexistente' }),
     ).rejects.toBeInstanceOf(UnknownChatModelError);
 
     await useCase.execute({ ...BASE_INPUT, model: null });
     expect(llm.lastInput?.model).toBe('gemini-flash-latest');
+    expect(llm.lastInput?.provider).toBe('gemini');
+  });
+
+  it('resolves the provider from the model across the whole catalog', async () => {
+    const { useCase, llm, credentials } = setup();
+    credentials.keys.set('org-1:anthropic', 'clave-anthropic');
+
+    await useCase.execute({ ...BASE_INPUT, model: 'claude-sonnet-5' });
+
+    expect(llm.lastInput?.provider).toBe('anthropic');
+    expect(llm.lastInput?.model).toBe('claude-sonnet-5');
+    expect(llm.lastInput?.apiKey).toBe('clave-anthropic');
+  });
+
+  it('lets keyless providers (ollama) chat without any credential', async () => {
+    const { useCase, llm, credentials } = setup();
+    credentials.keys.clear();
+
+    const result = await useCase.execute({ ...BASE_INPUT, model: 'llama3.1:8b' });
+
+    expect(result.message.content).toBe('Respuesta del modelo');
+    expect(llm.lastInput?.provider).toBe('ollama');
+    expect(llm.lastInput?.apiKey).toBe('');
   });
 
   it('falls back to general mode when an unknown mode arrives', async () => {

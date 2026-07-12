@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   InvalidApiKeyError,
+  KeylessProviderError,
   NotOrganizationAdminError,
   NotOrganizationMemberError,
   UnknownAiProviderError,
 } from '../../src/contexts/identity/modules/ai-credentials/domain/ai-provider-credential';
+import { AI_PROVIDERS } from '../../src/shared/ai-provider-catalog';
 import { SaveProviderCredentialUseCase } from '../../src/contexts/identity/modules/ai-credentials/use-cases/save-provider-credential/save-provider-credential.use-case';
 import { ListProviderCredentialsUseCase } from '../../src/contexts/identity/modules/ai-credentials/use-cases/list-provider-credentials/list-provider-credentials.use-case';
 import {
@@ -75,12 +77,22 @@ describe('SaveProviderCredentialUseCase', () => {
     roles.setRole('user-1', 'org-1', 'owner');
 
     await expect(
-      save.execute({ userId: 'user-1', organizationId: 'org-1', provider: 'openai', apiKey: API_KEY }),
+      save.execute({ userId: 'user-1', organizationId: 'org-1', provider: 'mistral', apiKey: API_KEY }),
     ).rejects.toBeInstanceOf(UnknownAiProviderError);
 
     await expect(
       save.execute({ userId: 'user-1', organizationId: 'org-1', provider: 'gemini', apiKey: 'corta' }),
     ).rejects.toBeInstanceOf(InvalidApiKeyError);
+  });
+
+  it('rechaza guardar una key para un proveedor keyless (ollama)', async () => {
+    const { roles, repo, save } = setup();
+    roles.setRole('user-1', 'org-1', 'owner');
+
+    await expect(
+      save.execute({ userId: 'user-1', organizationId: 'org-1', provider: 'ollama', apiKey: API_KEY }),
+    ).rejects.toBeInstanceOf(KeylessProviderError);
+    expect(repo.stored).toHaveLength(0);
   });
 });
 
@@ -93,13 +105,14 @@ describe('ListProviderCredentialsUseCase', () => {
 
     const providers = await list.execute('member-1', 'org-1');
 
-    expect(providers).toHaveLength(1);
-    expect(providers[0]).toMatchObject({
-      provider: 'gemini',
+    expect(providers).toHaveLength(AI_PROVIDERS.length);
+    const gemini = providers.find((setting) => setting.provider === 'gemini');
+    expect(gemini).toMatchObject({
       configured: true,
+      requiresApiKey: true,
       apiKeyLastFour: '8f21',
     });
-    expect(providers[0].models.length).toBeGreaterThan(0);
+    expect(gemini!.models.length).toBeGreaterThan(0);
     // Ninguna forma de la key sale del use-case.
     const serialized = JSON.stringify(providers);
     expect(serialized).not.toContain(API_KEY);
@@ -112,7 +125,22 @@ describe('ListProviderCredentialsUseCase', () => {
 
     const providers = await list.execute('member-1', 'org-1');
 
-    expect(providers[0]).toMatchObject({ provider: 'gemini', configured: false, apiKeyLastFour: null });
+    const gemini = providers.find((setting) => setting.provider === 'gemini');
+    expect(gemini).toMatchObject({ configured: false, apiKeyLastFour: null });
+  });
+
+  it('marca a los proveedores keyless como configurados sin credencial', async () => {
+    const { roles, list } = setup();
+    roles.setRole('member-1', 'org-1', 'member');
+
+    const providers = await list.execute('member-1', 'org-1');
+
+    const ollama = providers.find((setting) => setting.provider === 'ollama');
+    expect(ollama).toMatchObject({
+      requiresApiKey: false,
+      configured: true,
+      apiKeyLastFour: null,
+    });
   });
 
   it('rechaza a un no-miembro', async () => {

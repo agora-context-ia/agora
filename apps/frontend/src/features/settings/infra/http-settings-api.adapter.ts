@@ -14,6 +14,7 @@ function toSetting(dto: AiProviderSettingDto): AiProviderSetting {
   return {
     provider: dto.provider,
     label: dto.label,
+    requiresApiKey: dto.requiresApiKey,
     models: dto.models,
     configured: dto.configured,
     apiKeyLastFour: dto.apiKeyLastFour,

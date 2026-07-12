@@ -55,6 +55,7 @@ export class ProcessDocumentUseCase {
 
       const vectors = await this.embeddingProvider.embedBatch(
         chunks.map((chunk) => chunk.content),
+        'document',
       );
 
       await this.embeddings.replaceForSource(

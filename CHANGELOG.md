@@ -9,10 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **LLM provider abstraction (roadmap Phase 1)**: OpenAI, Anthropic and
+  **fully-local Ollama** chat providers alongside Gemini, behind a single
+  port with a routing adapter
+  ([ADR 0002](docs/architecture/decisions/0002-llm-provider-abstraction.md)).
+  The chosen model picks the provider; Ollama is keyless and its model
+  list is configured via `OLLAMA_CHAT_MODELS`. New backend env vars:
+  `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `OLLAMA_CHAT_MODELS`.
 - English documentation tree under `/docs` (product, architecture,
   deployment, usage, development) and the project [roadmap](docs/roadmap.md).
 - Community health files: CONTRIBUTING, CODE_OF_CONDUCT, SECURITY,
   CHANGELOG, issue/PR templates, CI workflow.
+
+### Changed
+
+- **Retrieval quality**: embeddings are now purpose-aware — documents and
+  queries are embedded with the task prefixes/taskType their model
+  expects (nomic prefixes on Ollama, `RETRIEVAL_DOCUMENT/QUERY` on
+  Gemini) — and chat context applies a minimum-relevance floor instead of
+  always injecting the top hits, with more fragments retrieved per
+  question (8, up from 5).
+- ⚠️ **Action required after upgrading**: documents indexed before this
+  change must be **reprocessed** (per-document "Reprocesar" action) —
+  their stored vectors lack the document-side prefix and would rank
+  poorly against the new prefixed queries.
 
 ## [0.1.0] — 2026-07-11
 

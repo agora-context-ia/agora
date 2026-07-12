@@ -27,22 +27,30 @@ To add one: implement the port (embed batches of texts + expose
 `modelName`), produce **768-dim vectors** (the DB column is
 `vector(768)`), and add the selection branch in the container.
 
-## Extension point: LLM providers
+## Extension point: LLM providers (available today)
 
-Today the chat module's `LlmProviderPort` has a single implementation
-(Gemini), and the model catalog lives in
-`shared/ai-provider-catalog.ts`.
+The chat module's `LlmProviderPort` has four implementations — Gemini,
+OpenAI, Anthropic, and Ollama — dispatched by
+`provider-routing-llm.adapter.ts` and registered in
+`shared/ai-provider-catalog.ts`. Design rationale in
+[ADR 0002](../architecture/decisions/0002-llm-provider-abstraction.md).
 
-**Before adding a provider here, read
-[roadmap Phase 1](../roadmap.md):** the provider abstraction layer
-(common input/output, streaming, error handling) is being designed so
-that each provider is one implementation of one interface. Community
-provider contributions are the explicit goal of that design — Ollama,
-OpenAI, and Anthropic are the first three planned.
+To add a provider (three steps, no use-case changes):
 
-<!-- TODO(phase-1): replace this section with the concrete "implement the
-     provider interface" guide once the abstraction lands (record the
-     design as an ADR). -->
+1. **Implement the port** in `ai/modules/chat/infra/<name>-llm.adapter.ts`
+   (copy an existing one — they are plain `fetch` calls, ~80 lines): map
+   `systemPrompt`/`history`/`userMessage` to the vendor's request, return
+   `{ content, tokensInput, tokensOutput }`, and throw
+   `LlmRequestFailedError` with a labeled message on any failure.
+2. **Register it in the catalog**: add the provider id to `AI_PROVIDERS`
+   and its entry (label, `requiresApiKey`, models) to
+   `AI_PROVIDER_CATALOG`. Keyless providers (`requiresApiKey: false`)
+   need no credential and appear as "local" in Settings.
+3. **Wire it in the container**: add the adapter to the
+   `ProviderRoutingLlmAdapter` map in `infrastructure/container.ts`.
+
+The Settings UI and the chat model selector pick up the new provider
+automatically from the catalog — no frontend changes.
 
 ## Extension point: document formats
 

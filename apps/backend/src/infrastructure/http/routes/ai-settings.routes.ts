@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import {
   InvalidApiKeyError,
+  KeylessProviderError,
   NotOrganizationAdminError,
   NotOrganizationMemberError,
   UnknownAiProviderError,
@@ -49,7 +50,7 @@ aiSettingsRouter.put('/:provider', async (req: Request, res: Response) => {
     if (error instanceof UnknownAiProviderError) {
       return res.status(404).json({ error: error.message });
     }
-    if (error instanceof InvalidApiKeyError) {
+    if (error instanceof InvalidApiKeyError || error instanceof KeylessProviderError) {
       return res.status(400).json({ error: error.message });
     }
     if (

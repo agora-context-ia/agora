@@ -57,9 +57,10 @@ inventing context.
 - 🔒 **Privacy by structure** — self-hosted, local embeddings via Ollama
   by default, org AI keys encrypted at rest (AES-256-GCM) and never
   exposed over HTTP.
-- 🔌 **Interchangeable AI provider** — Gemini today; a provider
-  abstraction with OpenAI, Anthropic, and fully-local Ollama generation
-  is [Phase 1 of the roadmap](docs/roadmap.md).
+- 🔌 **Interchangeable AI provider** — Gemini, OpenAI, Anthropic, or
+  **fully-local Ollama** (keyless) behind one abstraction; the chosen
+  model picks the provider per message. Adding a provider is
+  [one interface](docs/development/extending-agora.md).
 
 ## Quick start
 
@@ -99,8 +100,8 @@ Configuration reference:
 TypeScript end to end: **Express 5** + **Prisma** on a hexagonal (DDD)
 backend · **React 18 + Vite** frontend · **PostgreSQL 18 + pgvector**
 (HNSW) · **Redis** (BullMQ + pub/sub → SSE) · **Ollama** local embeddings
-· **Gemini** chat models · **Vitest**. Details in
-[docs/architecture/overview.md](docs/architecture/overview.md).
+and chat · **Gemini / OpenAI / Anthropic** cloud chat models · **Vitest**.
+Details in [docs/architecture/overview.md](docs/architecture/overview.md).
 
 ## Contributing
 

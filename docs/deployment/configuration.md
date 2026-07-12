@@ -28,8 +28,11 @@ use; never commit real secrets to a shared repository.
 | `EMBEDDING_PROVIDER` | `ollama` or `gemini` | `ollama` |
 | `EMBEDDING_MODEL` | Embedding model name | `nomic-embed-text` |
 | `EMBEDDING_DIM` | Vector dimensions (must match the DB column) | `768` |
-| `OLLAMA_BASE_URL` | Ollama server URL | `http://localhost:11434` |
+| `OLLAMA_BASE_URL` | Ollama server URL (embeddings + local chat models) | `http://localhost:11434` |
+| `OLLAMA_CHAT_MODELS` | Chat models offered by the local Ollama provider (comma-separated; each must be pulled) | `llama3.1:8b,qwen3:8b` |
 | `GEMINI_API_KEY` | Fallback Gemini key when an org has no credential configured | *(empty)* |
+| `OPENAI_API_KEY` | Fallback OpenAI key when an org has no credential configured | *(empty)* |
+| `ANTHROPIC_API_KEY` | Fallback Anthropic key when an org has no credential configured | *(empty)* |
 | `CREDENTIALS_ENCRYPTION_KEY` | **Required.** 32-byte hex key (AES-256-GCM) for org AI credentials. Generate: `openssl rand -hex 32` | — |
 | `UPLOADS_DIR` | Where uploaded files are stored | `./storage/uploads` |
 

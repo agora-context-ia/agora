@@ -42,6 +42,9 @@ retrieval → answer.
 - Each chunk is embedded via the configured **embedding provider**:
   - `ollama` (default): `nomic-embed-text`, fully local and free.
   - `gemini`: Google's embedding API.
+- Embedding is **purpose-aware**: chunks are embedded as *documents* and
+  questions as *queries* (nomic `search_document:`/`search_query:`
+  prefixes; Gemini `taskType`), as retrieval-tuned models require.
 - Vectors are **768-dimensional** (compatible with both providers) and
   stored in `ai.embeddings` (pgvector), tagged with the `model_name` that
   produced them so mixed-model spaces never cross-contaminate search.
@@ -50,10 +53,15 @@ retrieval → answer.
 
 ## 4. Retrieval (query time)
 
-- The user's question is embedded with the same provider/model.
+- The user's question is embedded with the same provider/model (as a
+  *query*, see above).
 - An **ANN search** runs in pgvector using cosine distance over an
   **HNSW index**, scoped to the project (space) and the embedding model,
-  returning the top **5** chunks with scores.
+  returning the top **8** chunks with scores.
+- Chunks scoring below the **relevance floor** (`MIN_RELEVANCE`, cosine
+  similarity 0.58 — calibrated on nomic-embed-text with task prefixes)
+  are dropped: an empty context — which the prompt states explicitly —
+  beats injecting unrelated fragments and presenting them as sources.
 - Results are **deduplicated per document** (the best fragment per
   document survives) before being shown as citations.
 - If retrieval is unavailable (e.g. Ollama down in local dev), the chat
@@ -65,8 +73,8 @@ retrieval → answer.
   prompt** (general, explain-process, design-requirement, summary,
   explain-rules, detect-contradictions, acceptance-criteria).
 - The last **12** messages of the conversation are sent as history.
-- The configured LLM (Gemini today; see
-  [ai-providers.md](ai-providers.md)) generates the reply.
+- The LLM behind the chosen model (Gemini, OpenAI, Anthropic or local
+  Ollama; see [ai-providers.md](ai-providers.md)) generates the reply.
 - Both the user message and the assistant reply are persisted — the reply
   **together with its sources** (see
   [traceability-and-citations.md](traceability-and-citations.md)).
@@ -78,7 +86,8 @@ retrieval → answer.
 
 | Constant | Value | Where |
 |---|---|---|
-| Context chunks retrieved | 5 | `send-chat-message.use-case.ts` |
+| Context chunks retrieved | 8 | `send-chat-message.use-case.ts` |
+| Relevance floor (cosine) | 0.58 | `embedding-context-search.adapter.ts` |
 | History messages sent | 12 | `send-chat-message.use-case.ts` |
 | Source fragment preview | 300 chars | `send-chat-message.use-case.ts` |
 | Embedding dimensions | 768 | `EMBEDDING_DIM` env |

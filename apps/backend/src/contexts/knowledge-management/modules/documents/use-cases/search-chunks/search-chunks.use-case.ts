@@ -37,7 +37,7 @@ export class SearchChunksUseCase {
     const spaceOrganization = await this.spaceAccess.findSpaceOrganization(spaceId);
     if (spaceOrganization !== organizationId) throw new SpaceNotFoundInOrganizationError();
 
-    const [queryEmbedding] = await this.embeddingProvider.embedBatch([query]);
+    const [queryEmbedding] = await this.embeddingProvider.embedBatch([query], 'query');
     return this.embeddings.search(
       spaceId,
       queryEmbedding,

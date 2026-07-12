@@ -20,7 +20,7 @@ export function ProjectSidebar() {
     <div className="flex h-full flex-col">
       <div className="border-b px-4 py-4">
         <h2 className="text-sm font-semibold text-foreground">Proyectos</h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">Espacios de conocimiento</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">Proyectos de conocimiento</p>
       </div>
 
       <ScrollArea className="flex-1">
@@ -30,7 +30,7 @@ export function ProjectSidebar() {
           )}
           {!isLoading && visibleProjects.length === 0 && (
             <div className="px-3 py-2 text-xs text-muted-foreground">
-              No hay espacios en esta organización.
+              No hay proyectos en esta organización.
             </div>
           )}
           {!isLoading &&

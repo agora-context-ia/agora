@@ -48,7 +48,7 @@ export function SourcesPage() {
             <div>
               <p className="text-sm font-medium text-foreground">Todavía no hay fuentes en este proyecto</p>
               <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                Subí el primer documento para que ContextHub AI pueda responder preguntas sobre él.
+                Subí el primer documento para que Ágora pueda responder preguntas sobre él.
               </p>
             </div>
           </div>

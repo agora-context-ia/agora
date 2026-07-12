@@ -125,6 +125,8 @@ export interface ChatMessageDto {
   role: ChatRoleDto;
   content: string;
   createdAt: string;
+  /** Sources that grounded an assistant reply; absent on user messages. */
+  sources?: ChatSourceDto[];
 }
 
 export interface SendChatMessageDto {

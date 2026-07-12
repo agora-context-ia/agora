@@ -1,5 +1,6 @@
 import { Bot, User } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useCurrentUser } from '@/features/auth/application/use-current-user';
 import { cn } from '@/lib/utils';
 import type { Message } from '../domain/message';
 import { MarkdownContent } from './MarkdownContent';
@@ -12,6 +13,7 @@ interface MessageBubbleProps {
 /** One message: assistant replies render as Markdown, user text as plain. */
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isAssistant = message.role === 'assistant';
+  const { user } = useCurrentUser();
 
   return (
     <div className={cn('flex gap-3 px-1 py-3', isAssistant ? 'bg-transparent' : 'bg-transparent')}>
@@ -22,7 +24,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-muted-foreground">{isAssistant ? 'ContextHub AI' : 'Vos'}</p>
+        <p className="truncate text-xs font-medium text-muted-foreground">
+          {isAssistant ? 'Ágora' : user?.name ?? 'Vos'}
+        </p>
         {isAssistant ? (
           <div className="mt-1">
             <MarkdownContent content={message.content} />

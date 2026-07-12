@@ -15,6 +15,8 @@ function toMessage(dto: ChatMessageDto): Message {
     role: dto.role,
     content: dto.content,
     createdAt: dto.createdAt,
+    // History carries persisted sources, so footnotes survive reloads.
+    sources: dto.sources && dto.sources.length > 0 ? dto.sources : undefined,
   };
 }
 

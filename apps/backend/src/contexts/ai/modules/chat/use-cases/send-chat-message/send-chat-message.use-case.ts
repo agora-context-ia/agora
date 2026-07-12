@@ -100,6 +100,16 @@ export class SendChatMessageUseCase {
       userMessage: input.content,
     });
 
+    // One source per document with a short preview fragment: persisted
+    // with the reply so the footnote survives history reloads.
+    const uiSources = dedupeByDocument(context).map((source) => ({
+      ...source,
+      fragment:
+        source.fragment.length > SOURCE_FRAGMENT_PREVIEW
+          ? `${source.fragment.slice(0, SOURCE_FRAGMENT_PREVIEW)}…`
+          : source.fragment,
+    }));
+
     // The user message is persisted only now: if the LLM call failed, the
     // conversation is not left with unanswered questions.
     await this.conversations.appendMessage({
@@ -114,6 +124,7 @@ export class SendChatMessageUseCase {
       modelName: model,
       tokensInput: reply.tokensInput,
       tokensOutput: reply.tokensOutput,
+      sources: uiSources,
     });
 
     if (conversation.title === null) {
@@ -130,13 +141,7 @@ export class SendChatMessageUseCase {
     return {
       conversationId: conversation.id,
       message: assistantMessage,
-      sources: dedupeByDocument(context).map((source) => ({
-        ...source,
-        fragment:
-          source.fragment.length > SOURCE_FRAGMENT_PREVIEW
-            ? `${source.fragment.slice(0, SOURCE_FRAGMENT_PREVIEW)}…`
-            : source.fragment,
-      })),
+      sources: uiSources,
     };
   }
 

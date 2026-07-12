@@ -37,6 +37,8 @@ export interface ChatMessage {
   role: ChatRole;
   content: string;
   createdAt: Date;
+  /** Sources that grounded an assistant reply; absent on user messages. */
+  sources?: ChatSource[];
 }
 
 /**

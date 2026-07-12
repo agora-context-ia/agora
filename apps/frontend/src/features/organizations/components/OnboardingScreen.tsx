@@ -23,7 +23,7 @@ export function OnboardingScreen() {
           </div>
           <CardTitle>Creá tu primera organización</CardTitle>
           <CardDescription>
-            Todo en ContextHub AI vive dentro de una organización: sus espacios de conocimiento y
+            Todo en Ágora vive dentro de una organización: sus proyectos de conocimiento y
             las personas que invites a trabajar en ellos.
           </CardDescription>
         </CardHeader>

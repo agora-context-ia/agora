@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 /** UI color scheme. */
 export type Theme = 'light' | 'dark';
 
-const STORAGE_KEY = 'contexthub-theme';
+const STORAGE_KEY = 'agora-theme';
 
 function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark');

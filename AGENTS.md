@@ -95,6 +95,20 @@ Current contexts: `identity` (auth, organizations, ai-credentials),
 - Every schema change ships as a **versioned Prisma migration** in
   `prisma/migrations/` (including triggers/seeds in the SQL when needed).
   Never `db push` against a shared database.
+- **Some DB objects are not expressible in the Prisma DSL and are managed
+  by hand** — notably the pgvector **HNSW index** on `ai.embeddings`
+  (`idx_embeddings_vector_hnsw`) and `uuidv7()` column defaults. Prisma
+  does not see them, so **every `prisma migrate dev` will try to `DROP`
+  them as "drift"**. Before applying a generated migration, **read it and
+  delete any statement that drops a hand-managed object** (e.g.
+  `DROP INDEX ... idx_embeddings_vector_hnsw`, `ALTER COLUMN ... DROP
+  DEFAULT` on `updated_at`). If one slips through, restore it with a new
+  hand-written migration (see `20260712000000_restore_vector_indexes`).
+- **Raw SQL inserts bypass Prisma's `@updatedAt`/`@default` handling**:
+  when a table column is app-managed (`@updatedAt`) it has **no DB
+  default**, so any `$executeRaw`/`$queryRaw` INSERT must set `updated_at`
+  (and other app-managed columns) explicitly — Prisma only fills them on
+  ORM operations, not on raw SQL (see `prisma-embedding.repository.ts`).
 - Encrypted secrets (AI provider API keys): AES-256-GCM behind
   `CredentialCipherPort`. **The key — plain or encrypted — never leaves
   over HTTP**; only `apiKeyLastFour` is exposed.
@@ -241,3 +255,23 @@ side to "align" them without an explicit decision.
   `Prisma*Repository`.
 - One use case per folder: `use-cases/<action>/<action>.use-case.ts`.
 - Commits: short imperative subject line.
+
+## Git flow
+
+All work follows **git flow** over these long-lived branches:
+
+```
+main     → production. Only receives merges from preprod (releases) and hotfixes.
+preprod  → release-candidate staging. Receives merges from qa.
+qa       → integration testing. Receives merges from develop.
+develop  → integration branch. Every feature starts and lands here.
+```
+
+- **Every feature is developed in a `feature/<short-name>` branch cut from
+  `develop`** and merged back into `develop` via PR. Never commit features
+  directly to `develop`, `qa`, `preprod` or `main`.
+- Promotion always moves upward `develop → qa → preprod → main`; never skip
+  a stage.
+- Fixes found while testing follow the same flow (`fix/<short-name>` from
+  `develop`); only urgent production hotfixes (`hotfix/<short-name>`) may
+  branch from `main`, and they are merged back to both `main` and `develop`.

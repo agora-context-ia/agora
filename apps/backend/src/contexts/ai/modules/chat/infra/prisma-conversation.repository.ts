@@ -1,5 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../../../../infrastructure/persistence/prisma-client';
-import type { ChatMessage, ChatRole, Conversation } from '../domain/chat';
+import type { ChatMessage, ChatRole, ChatSource, Conversation } from '../domain/chat';
 import type {
   AppendMessageData,
   ConversationRepositoryPort,
@@ -54,6 +55,7 @@ export class PrismaConversationRepository implements ConversationRepositoryPort 
           modelName: data.modelName ?? null,
           tokensInput: data.tokensInput ?? null,
           tokensOutput: data.tokensOutput ?? null,
+          sources: data.sources ? (data.sources as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         },
       }),
       prisma.conversation.update({
@@ -69,9 +71,11 @@ export class PrismaConversationRepository implements ConversationRepositoryPort 
     limit: number = DEFAULT_MESSAGES_LIMIT,
   ): Promise<ChatMessage[]> {
     // Fetch the latest `limit` messages in chronological order: desc + reverse.
+    // id (uuidv7, time-ordered) breaks createdAt ties so a user/assistant
+    // pair persisted in the same millisecond keeps insertion order.
     const messages = await prisma.message.findMany({
       where: { conversationId, status: true, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit,
     });
     return messages.reverse().map(toChatMessage);
@@ -99,11 +103,16 @@ function toChatMessage(message: {
   role: string;
   content: string;
   createdAt: Date;
+  sources: Prisma.JsonValue;
 }): ChatMessage {
   return {
     id: message.id,
     role: message.role as ChatRole,
     content: message.content,
     createdAt: message.createdAt,
+    // Stored as JSONB with the exact ChatSource[] shape (see appendMessage).
+    sources: Array.isArray(message.sources)
+      ? (message.sources as unknown as ChatSource[])
+      : undefined,
   };
 }

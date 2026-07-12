@@ -383,6 +383,10 @@ model Embedding {
   space Space        @relation(fields: [spaceId], references: [id])
 
   @@index([spaceId])
+  // Filter index for semantic search (WHERE space_id = ? AND model_name = ?).
+  // Declared here so `prisma migrate dev` keeps it in sync (the HNSW vector
+  // index is not modelable in the DSL and is kept by hand in the migration).
+  @@index([spaceId, modelName])
   @@map("embeddings")
   @@schema("ai")
 }
@@ -423,6 +427,9 @@ model Message {
   tokensInput    Int?        @map("tokens_input")
   tokensOutput   Int?        @map("tokens_output")
   modelName      String?     @map("model_name") @db.VarChar(100)
+  // Sources that grounded an assistant reply (ChatSource[] as JSON), so
+  // the footnote survives history reloads. Null for user messages.
+  sources        Json?
   status         Boolean     @default(true)
   createdAt      DateTime    @default(now()) @map("created_at")
   updatedAt      DateTime    @updatedAt @map("updated_at")

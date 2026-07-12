@@ -22,13 +22,37 @@ services:
       - '${REDIS_PORT}:6379'
 
   # Servidor de embeddings local. Modelos persistidos en volumen (pesan GB).
-  # Descarga inicial (una vez): docker compose exec ollama ollama pull nomic-embed-text
+  # El modelo se descarga automáticamente vía el sidecar `ollama-init`.
   ollama:
     image: ollama/ollama:latest
     ports:
       - '${OLLAMA_PORT:-11434}:11434'
     volumes:
       - ollama_models:/root/.ollama
+    healthcheck:
+      # `ollama list` responde 0 solo cuando el servidor ya acepta peticiones.
+      test: ['CMD', 'ollama', 'list']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # Sidecar de un solo uso: espera a que `ollama` esté sano y garantiza que
+  # el modelo de embeddings esté descargado (idempotente). Corre al hacer
+  # `docker compose up` y termina; no reinicia.
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      # La CLI apunta al servidor `ollama`; la descarga se guarda en su volumen.
+      OLLAMA_HOST: http://ollama:11434
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nomic-embed-text}
+    volumes:
+      - ./scripts/pull-ollama-model.sh:/pull-ollama-model.sh:ro
+    entrypoint: ['/bin/sh', '/pull-ollama-model.sh']
+    restart: 'no'
 
   backend:
     build: ./apps/backend

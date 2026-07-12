@@ -33,6 +33,12 @@ export function UserSidebar() {
         collapsed ? 'w-16' : 'w-56',
       )}
     >
+      {/* App brand: icon-only when collapsed, icon + wordmark expanded. */}
+      <div className={cn('flex items-center gap-2 border-b p-3', collapsed && 'justify-center')}>
+        <img src="/assets/agora-icon.png" alt="Ágora" className="h-7 w-7 shrink-0 rounded-md" />
+        {!collapsed && <span className="text-base font-semibold text-foreground">Ágora</span>}
+      </div>
+
       <div
         className={cn(
           'flex border-b p-3',

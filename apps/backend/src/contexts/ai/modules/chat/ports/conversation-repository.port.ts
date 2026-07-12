@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatRole, Conversation } from '../domain/chat';
+import type { ChatMessage, ChatRole, ChatSource, Conversation } from '../domain/chat';
 
 /** Payload to persist a chat message, with model/token metadata for assistant turns. */
 export interface AppendMessageData {
@@ -8,6 +8,8 @@ export interface AppendMessageData {
   modelName?: string | null;
   tokensInput?: number | null;
   tokensOutput?: number | null;
+  /** Sources that grounded an assistant reply (persisted for history). */
+  sources?: ChatSource[];
 }
 
 /**

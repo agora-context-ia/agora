@@ -23,12 +23,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-4">
+      <img src="/assets/agora-logo.png" alt="Ágora" className="h-16 w-auto" />
       <Card className="w-full max-w-sm">
         <form onSubmit={handleSubmit}>
           <CardHeader>
             <CardTitle>Iniciar sesión</CardTitle>
-            <CardDescription>Entra a tu cuenta de ContextHub AI</CardDescription>
+            <CardDescription>Entra a tu cuenta de Ágora</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">

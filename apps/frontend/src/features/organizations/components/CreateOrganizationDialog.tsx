@@ -39,7 +39,7 @@ export function CreateOrganizationDialog({ trigger }: CreateOrganizationDialogPr
         <DialogHeader>
           <DialogTitle>Crear organización</DialogTitle>
           <DialogDescription>
-            Los espacios y sus miembros viven dentro de una organización.
+            Los proyectos y sus miembros viven dentro de una organización.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3">

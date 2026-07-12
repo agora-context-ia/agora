@@ -26,11 +26,14 @@ export class ListProviderCredentialsUseCase {
 
     return AI_PROVIDERS.map((provider) => {
       const credential = configured.find((row) => row.provider === provider);
+      const { label, models, requiresApiKey } = AI_PROVIDER_CATALOG[provider];
       return {
         provider,
-        label: AI_PROVIDER_CATALOG[provider].label,
-        models: AI_PROVIDER_CATALOG[provider].models,
-        configured: credential !== undefined,
+        label,
+        requiresApiKey,
+        models,
+        // Keyless providers are part of the deployment itself: always usable.
+        configured: !requiresApiKey || credential !== undefined,
         apiKeyLastFour: credential?.apiKeyLastFour ?? null,
         updatedAt: credential?.updatedAt ?? null,
       };

@@ -8,7 +8,14 @@ export interface ContextSearchPort {
   /**
    * Returns up to `limit` fragments relevant to `query`, ordered by
    * descending relevance. Fragments come back full-length; callers decide
-   * how much of them to expose.
+   * how much of them to expose. When `minRelevance` is given, fragments
+   * scoring below it are dropped; otherwise the adapter applies its
+   * calibrated default threshold.
    */
-  search(spaceId: string, query: string, limit: number): Promise<ChatSource[]>;
+  search(
+    spaceId: string,
+    query: string,
+    limit: number,
+    minRelevance?: number,
+  ): Promise<ChatSource[]>;
 }

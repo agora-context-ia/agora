@@ -21,10 +21,11 @@ the retrieved context:
 
 ## Model selection
 
-Next to the mode selector you can pick the model per conversation:
-**Gemini Flash** (fast), **Flash Lite** (cheapest) or **Gemini Pro**
-(most capable). More providers arrive with
-[roadmap Phase 1](../roadmap.md).
+Next to the mode selector you can pick the model per message, from every
+provider your organization has available: **Gemini** (Flash / Flash Lite
+/ Pro), **OpenAI** (GPT-4o mini / GPT-4o), **Anthropic** (Claude Haiku /
+Sonnet / Opus) or **local Ollama models** — the model you pick determines
+the provider that answers.
 
 ## Citations — trust, but verify
 

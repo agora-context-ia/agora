@@ -10,6 +10,8 @@ export interface AiModelOption {
 export interface AiProviderSetting {
   provider: string;
   label: string;
+  /** false for self-hosted providers (e.g. Ollama local): no key to configure. */
+  requiresApiKey: boolean;
   models: AiModelOption[];
   configured: boolean;
   apiKeyLastFour: string | null;

@@ -17,11 +17,13 @@ export interface ProviderCredentialSummary {
 
 /**
  * State of a supported provider, configured or not. Feeds both the
- * Settings section and the chat model selector.
+ * Settings section and the chat model selector. Keyless providers
+ * (`requiresApiKey: false`, e.g. local Ollama) are always `configured`.
  */
 export interface ProviderSetting {
   provider: AiProvider;
   label: string;
+  requiresApiKey: boolean;
   models: Array<{ value: string; label: string }>;
   configured: boolean;
   apiKeyLastFour: string | null;
@@ -57,5 +59,13 @@ export class InvalidApiKeyError extends Error {
   constructor() {
     super('La API key no parece válida');
     this.name = 'InvalidApiKeyError';
+  }
+}
+
+/** Thrown when trying to store an API key for a provider that does not use one. */
+export class KeylessProviderError extends Error {
+  constructor(provider: string) {
+    super(`El proveedor "${provider}" es local y no usa API key`);
+    this.name = 'KeylessProviderError';
   }
 }

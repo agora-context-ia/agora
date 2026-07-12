@@ -63,7 +63,6 @@ the chat.
 ### AI Provider
 
 The external or local model service Ágora uses for embeddings and chat
-generation (today: Google Gemini for chat; Ollama or Gemini for
-embeddings). Interchangeable by design — see
-[ai-providers.md](../architecture/ai-providers.md) and Phase 1 of the
-[roadmap](../roadmap.md).
+generation (chat: Gemini, OpenAI, Anthropic or local Ollama; embeddings:
+Ollama or Gemini). Interchangeable by design — see
+[ai-providers.md](../architecture/ai-providers.md).

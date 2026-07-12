@@ -13,7 +13,10 @@ import type {
   CreateDocumentData,
   DocumentRepositoryPort,
 } from '../../../src/contexts/knowledge-management/modules/documents/ports/document-repository.port';
-import type { EmbeddingProviderPort } from '../../../src/contexts/knowledge-management/modules/documents/ports/embedding-provider.port';
+import type {
+  EmbeddingProviderPort,
+  EmbeddingPurpose,
+} from '../../../src/contexts/knowledge-management/modules/documents/ports/embedding-provider.port';
 import type {
   ChunkWithEmbedding,
   EmbeddingRepositoryPort,
@@ -158,9 +161,11 @@ export class FakeEmbeddingProvider implements EmbeddingProviderPort {
   readonly modelName = 'fake-model';
   readonly dimensions = 768;
   failWith: Error | null = null;
+  readonly purposes: EmbeddingPurpose[] = [];
 
-  async embedBatch(texts: string[]): Promise<number[][]> {
+  async embedBatch(texts: string[], purpose: EmbeddingPurpose): Promise<number[][]> {
     if (this.failWith) throw this.failWith;
+    this.purposes.push(purpose);
     return texts.map(() => new Array<number>(this.dimensions).fill(0.1));
   }
 }

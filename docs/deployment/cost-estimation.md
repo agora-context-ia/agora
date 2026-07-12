@@ -35,15 +35,16 @@ Ollama, the API, and the web app.
 ## AI provider costs
 
 - **Embeddings via Ollama (default):** $0 — runs on your infrastructure.
-- **Chat via Gemini:** billed per token by Google, per organization key.
-  Cost scales with questions asked, retrieved context (5 fragments per
-  question), and history (12 messages). Model choice matters: Flash Lite
-  (cheapest) vs Flash vs Pro.
-  <!-- TODO: add a worked example (questions/month → estimated cost) with
-       current Gemini pricing at time of writing; prices change, link to
-       https://ai.google.dev/pricing instead of hardcoding. -->
-- **Chat via Ollama (Phase 1):** $0 marginal cost; the trade-off moves to
-  hardware (RAM/GPU for the chosen model).
+- **Chat via a cloud provider (Gemini, OpenAI, Anthropic):** billed per
+  token by the vendor, per organization key. Cost scales with questions
+  asked, retrieved context (up to 8 fragments per question), and history
+  (12 messages). Model choice matters — each provider offers a cheap/fast
+  tier and a capable tier.
+  <!-- TODO: add a worked example (questions/month → estimated cost);
+       prices change, link to each vendor's pricing page instead of
+       hardcoding. -->
+- **Chat via Ollama (local):** $0 marginal cost; the trade-off moves to
+  hardware (RAM/GPU for the chosen model, e.g. `llama3.1:8b` wants ~8 GB).
 
 ## Transactional email (Phase 2 dependency)
 
@@ -55,8 +56,9 @@ service.
 
 ## Rule of thumb
 
-- **Evaluation / small team, privacy-first:** self-host with Ollama
-  embeddings — the only real cost is the machine. Chat requires a Gemini
-  key today (its free tier may be enough to evaluate).
-- **Cloud-assisted:** small VPS + Gemini Flash Lite keeps monthly costs
-  dominated by LLM usage, which you control per organization key.
+- **Evaluation / small team, privacy-first:** self-host with Ollama for
+  embeddings **and** chat — the only real cost is the machine (fully
+  local, $0 in AI fees).
+- **Cloud-assisted:** small VPS + a cheap cloud model (Gemini Flash Lite,
+  GPT-4o mini, Claude Haiku) keeps monthly costs dominated by LLM usage,
+  which you control per organization key.

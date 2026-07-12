@@ -18,8 +18,11 @@ continue.
 ## 3. Connect the AI provider
 
 Open **Configuración** in the left sidebar and add your organization's
-Gemini API key (see [AI provider setup](../deployment/ai-provider-setup.md)).
-Without it, uploads and search work, but chat answers cannot be generated.
+API key for the provider you want (Gemini, OpenAI or Anthropic) — or use
+the local **Ollama** provider, which needs no key (see
+[AI provider setup](../deployment/ai-provider-setup.md)). Without at
+least one available provider, uploads and search work, but chat answers
+cannot be generated.
 
 ## 4. Create a project
 

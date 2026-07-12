@@ -3,9 +3,13 @@
  * instantiated and wired together (manual DI). If the graph grows,
  * consider migrating to awilix or similar.
  */
+import { AnthropicLlmAdapter } from '../contexts/ai/modules/chat/infra/anthropic-llm.adapter';
 import { EmbeddingContextSearchAdapter } from '../contexts/ai/modules/chat/infra/embedding-context-search.adapter';
 import { GeminiLlmAdapter } from '../contexts/ai/modules/chat/infra/gemini-llm.adapter';
+import { OllamaLlmAdapter } from '../contexts/ai/modules/chat/infra/ollama-llm.adapter';
+import { OpenAiLlmAdapter } from '../contexts/ai/modules/chat/infra/openai-llm.adapter';
 import { OrgCredentialLlmKeyAdapter } from '../contexts/ai/modules/chat/infra/org-credential-llm-key.adapter';
+import { ProviderRoutingLlmAdapter } from '../contexts/ai/modules/chat/infra/provider-routing-llm.adapter';
 import { PrismaConversationRepository } from '../contexts/ai/modules/chat/infra/prisma-conversation.repository';
 import { RedisChatRealtimeNotifierAdapter } from '../contexts/ai/modules/chat/infra/redis-chat-realtime-notifier.adapter';
 import { CreateConversationUseCase } from '../contexts/ai/modules/chat/use-cases/create-conversation/create-conversation.use-case';
@@ -97,9 +101,18 @@ const embeddingProvider = createEmbeddingProvider();
 
 const conversationRepository = new PrismaConversationRepository();
 const chatRealtimeNotifier = new RedisChatRealtimeNotifierAdapter();
-const llmProvider = new GeminiLlmAdapter();
+// One adapter per provider, dispatched by the model's catalog provider.
+// Adding a provider = implement LlmProviderPort + register it here.
+const llmProvider = new ProviderRoutingLlmAdapter({
+  gemini: new GeminiLlmAdapter(),
+  openai: new OpenAiLlmAdapter(),
+  anthropic: new AnthropicLlmAdapter(),
+  ollama: new OllamaLlmAdapter(env.OLLAMA_BASE_URL),
+});
 const llmCredentials = new OrgCredentialLlmKeyAdapter(aiCredentialRepository, credentialCipher, {
   gemini: env.GEMINI_API_KEY,
+  openai: env.OPENAI_API_KEY,
+  anthropic: env.ANTHROPIC_API_KEY,
 });
 // Chat retrieves context through its own port; the adapter composes the
 // knowledge-management embedding infrastructure (anti-corruption layer).

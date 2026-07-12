@@ -25,7 +25,7 @@ The roadmap below completes the product around that core.
 
 | Phase | Theme | Why it matters | Status |
 |---|---|---|---|
-| **1** | Provider Independence | Completes the *identity* Ágora promises | ⏳ |
+| **1** | Provider Independence | Completes the *identity* Ágora promises | ✅ (streaming pending) |
 | **2** | Multi-user Collaboration | Completes the *value* (shared context) | ⏳ |
 | **3** | Knowledge Graph | Adds *depth* and a differentiator | ⏳ |
 | **4** | Open Source Readiness | Turns the repo into an *adoptable project* | ⏳ |
@@ -46,15 +46,18 @@ as one implementation of that interface. This directly serves the
 *extensibility* principle and makes the 5th provider
 (community-contributed) trivial.
 
-- [ ] Design and build the **LLM Provider abstraction layer**
-- [ ] Refactor the existing Gemini integration to use the abstraction
-- [ ] Add **OpenAI (ChatGPT)** provider
-- [ ] Add **Anthropic (Claude)** provider
-- [ ] Add **Ollama (self-hosted)** provider ⭐ *strategic priority — unlocks real, free self-hosting*
-- [ ] Provider selection via configuration
+- [x] Design and build the **LLM Provider abstraction layer**
+      ([ADR 0002](architecture/decisions/0002-llm-provider-abstraction.md))
+- [x] Refactor the existing Gemini integration to use the abstraction
+- [x] Add **OpenAI (ChatGPT)** provider
+- [x] Add **Anthropic (Claude)** provider
+- [x] Add **Ollama (self-hosted)** provider ⭐ *strategic priority — unlocks real, free self-hosting*
+- [x] Provider selection via configuration (model catalog + `OLLAMA_CHAT_MODELS`)
+- [ ] Token **streaming** through the abstraction to the UI *(deferred — see ADR 0002)*
 
 **Definition of Done:** any provider is selectable via config; adding a new
-provider means implementing a single interface.
+provider means implementing a single interface. ✅ Met — see the guide in
+[extending Ágora](development/extending-agora.md).
 
 ---
 

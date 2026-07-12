@@ -1,6 +1,7 @@
 import {
   EmbeddingDimensionMismatchError,
   type EmbeddingProviderPort,
+  type EmbeddingPurpose,
 } from '../ports/embedding-provider.port';
 
 interface GeminiBatchEmbedResponse {
@@ -18,7 +19,11 @@ export class GeminiEmbeddingAdapter implements EmbeddingProviderPort {
     public readonly dimensions: number,
   ) {}
 
-  async embedBatch(texts: string[]): Promise<number[][]> {
+  async embedBatch(texts: string[], purpose: EmbeddingPurpose): Promise<number[][]> {
+    // Gemini's native mechanism for asymmetric retrieval embeddings.
+    // NOTE: changing the document-side taskType changes stored vectors —
+    // existing documents must be reprocessed.
+    const taskType = purpose === 'document' ? 'RETRIEVAL_DOCUMENT' : 'RETRIEVAL_QUERY';
     const vectors: number[][] = [];
     for (let i = 0; i < texts.length; i += BATCH_SIZE) {
       const batch = texts.slice(i, i + BATCH_SIZE);
@@ -33,6 +38,7 @@ export class GeminiEmbeddingAdapter implements EmbeddingProviderPort {
           requests: batch.map((text) => ({
             model: `models/${this.modelName}`,
             content: { parts: [{ text }] },
+            taskType,
             // Matryoshka models (gemini-embedding-001: 3072 native) get
             // truncated to 768 here; text-embedding-004 is 768 natively.
             outputDimensionality: this.dimensions,

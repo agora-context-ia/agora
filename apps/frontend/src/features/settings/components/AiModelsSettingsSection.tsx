@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyRound } from 'lucide-react';
+import { KeyRound, ServerCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ApiError } from '@/lib/api';
@@ -59,6 +59,27 @@ function ProviderCard({ provider, canEdit, onSave }: ProviderCardProps) {
       setIsSaving(false);
     }
   };
+
+  // Keyless providers (Ollama local) run on the deployment's own
+  // infrastructure: nothing to configure, no key form.
+  if (!provider.requiresApiKey) {
+    return (
+      <div className="rounded-lg border p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <ServerCog className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">{provider.label}</p>
+          </div>
+          <span className="rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+            Local — no requiere API key
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Modelos disponibles: {provider.models.map((model) => model.label).join(', ')}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border p-4">

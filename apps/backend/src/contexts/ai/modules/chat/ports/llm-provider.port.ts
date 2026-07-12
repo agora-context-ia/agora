@@ -4,8 +4,13 @@ export interface LlmHistoryMessage {
   content: string;
 }
 
-/** Everything an LLM call needs; `history` excludes the new user message. */
+/**
+ * Everything an LLM call needs; `history` excludes the new user message.
+ * `provider` is the catalog id the model belongs to (routing key);
+ * `apiKey` is empty for keyless providers (e.g. local Ollama).
+ */
 export interface LlmGenerateInput {
+  provider: string;
   apiKey: string;
   model: string;
   systemPrompt: string;

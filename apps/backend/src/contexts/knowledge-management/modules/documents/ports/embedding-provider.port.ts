@@ -10,6 +10,14 @@ export class EmbeddingDimensionMismatchError extends Error {
 }
 
 /**
+ * What the texts are being embedded for. Retrieval models are asymmetric:
+ * documents and queries must be embedded differently (nomic prefixes,
+ * Gemini taskType) or ranking quality degrades. Adapters translate the
+ * purpose into their provider's mechanism.
+ */
+export type EmbeddingPurpose = 'document' | 'query';
+
+/**
  * Swappable embeddings provider (local Ollama, Gemini API, etc.).
  * Contract: every returned vector has exactly `dimensions` components;
  * `modelName` is persisted next to each vector because embeddings from
@@ -19,5 +27,5 @@ export class EmbeddingDimensionMismatchError extends Error {
 export interface EmbeddingProviderPort {
   readonly modelName: string;
   readonly dimensions: number;
-  embedBatch(texts: string[]): Promise<number[][]>;
+  embedBatch(texts: string[], purpose: EmbeddingPurpose): Promise<number[][]>;
 }

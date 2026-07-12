@@ -23,7 +23,13 @@ export const env = {
   EMBEDDING_MODEL: process.env.EMBEDDING_MODEL ?? 'nomic-embed-text',
   EMBEDDING_DIM: Number(process.env.EMBEDDING_DIM ?? 768),
   OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434',
+
+  // Local-development fallback keys per LLM provider. In real deployments
+  // each organization stores its own key (encrypted) from Settings.
+  // OLLAMA_CHAT_MODELS (comma-separated) is read by the provider catalog.
   GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? '',
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? '',
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? '',
 
   // Symmetric key (32 bytes hex) to encrypt per-organization AI provider
   // API keys. See aes-credential-cipher.ts.

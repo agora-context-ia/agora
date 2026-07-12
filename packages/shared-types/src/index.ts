@@ -76,7 +76,7 @@ export interface SemanticSearchHitDto {
 // to the frontend: only apiKeyLastFour.
 // ---------------------------------------------------------------------
 
-export type AiProviderDto = 'gemini';
+export type AiProviderDto = 'gemini' | 'openai' | 'anthropic' | 'ollama';
 
 export interface AiModelOptionDto {
   value: string;
@@ -86,6 +86,8 @@ export interface AiModelOptionDto {
 export interface AiProviderSettingDto {
   provider: AiProviderDto;
   label: string;
+  /** false for self-hosted providers (e.g. Ollama): no key to configure. */
+  requiresApiKey: boolean;
   models: AiModelOptionDto[];
   configured: boolean;
   apiKeyLastFour: string | null;

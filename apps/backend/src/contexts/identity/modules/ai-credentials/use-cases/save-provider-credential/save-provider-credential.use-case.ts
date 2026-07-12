@@ -1,6 +1,7 @@
-import { isAiProvider } from '../../../../../../shared/ai-provider-catalog';
+import { AI_PROVIDER_CATALOG, isAiProvider } from '../../../../../../shared/ai-provider-catalog';
 import {
   InvalidApiKeyError,
+  KeylessProviderError,
   NotOrganizationAdminError,
   NotOrganizationMemberError,
   UnknownAiProviderError,
@@ -35,6 +36,7 @@ export class SaveProviderCredentialUseCase {
 
   /**
    * @throws UnknownAiProviderError when the provider is not in the catalog.
+   * @throws KeylessProviderError when the provider does not use an API key.
    * @throws InvalidApiKeyError when the key fails basic shape validation.
    * @throws NotOrganizationMemberError when the user is not a member.
    * @throws NotOrganizationAdminError when the member is not owner/admin.
@@ -42,6 +44,9 @@ export class SaveProviderCredentialUseCase {
   async execute(input: SaveProviderCredentialInput): Promise<ProviderCredentialSummary> {
     if (!isAiProvider(input.provider)) {
       throw new UnknownAiProviderError(input.provider);
+    }
+    if (!AI_PROVIDER_CATALOG[input.provider].requiresApiKey) {
+      throw new KeylessProviderError(input.provider);
     }
 
     const apiKey = input.apiKey.trim();

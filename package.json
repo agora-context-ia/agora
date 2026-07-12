@@ -2,6 +2,7 @@
   "name": "contexthub-ai",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev:backend": "pnpm --filter @contexthub-ai/backend dev",
     "dev:frontend": "pnpm --filter @contexthub-ai/frontend dev",

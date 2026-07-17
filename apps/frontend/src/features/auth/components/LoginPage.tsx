@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,16 +10,18 @@ import { useLogin } from '../application/use-login';
 export function LoginPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = safeReturnTo(searchParams.get('returnTo'));
   const { login, isSubmitting, error } = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to={returnTo} replace />;
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const success = await login({ email, password });
-    if (success) navigate('/', { replace: true });
+    if (success) navigate(returnTo, { replace: true });
   };
 
   return (
@@ -66,7 +68,7 @@ export function LoginPage() {
             </Button>
             <p className="text-sm text-muted-foreground">
               ¿No tienes cuenta?{' '}
-              <Link to="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+              <Link to={`/register?returnTo=${encodeURIComponent(returnTo)}`} className="font-medium text-foreground underline-offset-4 hover:underline">
                 Regístrate
               </Link>
             </p>
@@ -75,4 +77,9 @@ export function LoginPage() {
       </Card>
     </div>
   );
+}
+
+/** Allows only an internal application path as the post-auth destination. */
+function safeReturnTo(value: string | null): string {
+  return value?.startsWith('/') && !value.startsWith('//') ? value : '/';
 }

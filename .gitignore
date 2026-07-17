@@ -2,6 +2,8 @@ node_modules
 dist
 dist-ssr
 *.tsbuildinfo
+.env.production
+deploy/.env.production
 
 # Secretos por ambiente: .env.local nunca se versiona (ver *.local arriba,
 # cubre environments/.env.local en la raíz y en cada app).

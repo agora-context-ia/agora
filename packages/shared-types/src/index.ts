@@ -19,6 +19,37 @@ export interface CreateOrganizationDto {
   name: string;
 }
 
+/** A user with active access to an organization. */
+export interface OrganizationMemberDto {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  role: OrganizationRoleDto;
+  joinedAt: string | null;
+}
+
+/** A pending invitation; its secret token is never returned after creation. */
+export interface OrganizationInvitationDto {
+  id: string;
+  organizationId: string;
+  email: string;
+  role: Exclude<OrganizationRoleDto, 'owner'>;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export interface CreateOrganizationInvitationDto {
+  email: string;
+  role: Exclude<OrganizationRoleDto, 'owner'>;
+}
+
+/** Creation result includes the one-time invitation URL to share with the recipient. */
+export interface CreateOrganizationInvitationResponseDto {
+  invitation: OrganizationInvitationDto;
+  invitationUrl: string;
+}
+
 // ---------------------------------------------------------------------
 // Spaces (projects inside an organization)
 // ---------------------------------------------------------------------

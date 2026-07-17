@@ -9,6 +9,7 @@ export const env = {
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean),
+  FRONTEND_URL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
   // The session cookie carries the Secure flag except in local (http://).
   // It can be forced with COOKIE_SECURE=true.
   COOKIE_SECURE:

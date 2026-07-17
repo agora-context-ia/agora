@@ -17,6 +17,8 @@ import { GetChatHistoryUseCase } from '../contexts/ai/modules/chat/use-cases/get
 import { ListConversationsUseCase } from '../contexts/ai/modules/chat/use-cases/list-conversations/list-conversations.use-case';
 import { SendChatMessageUseCase } from '../contexts/ai/modules/chat/use-cases/send-chat-message/send-chat-message.use-case';
 import { BcryptPasswordHasher } from '../contexts/identity/modules/auth/infra/bcrypt-password-hasher';
+import { PrismaCollaborationRepository } from '../contexts/identity/modules/collaboration/infra/prisma-collaboration.repository';
+import { ManageCollaborationUseCase } from '../contexts/identity/modules/collaboration/use-cases/manage-collaboration/manage-collaboration.use-case';
 import { PrismaSessionRepository } from '../contexts/identity/modules/auth/infra/prisma-session.repository';
 import { PrismaUserRepository } from '../contexts/identity/modules/auth/infra/prisma-user.repository';
 import { GetCurrentUserUseCase } from '../contexts/identity/modules/auth/use-cases/get-current-user/get-current-user.use-case';
@@ -67,6 +69,7 @@ const sessionRepository = new PrismaSessionRepository();
 const passwordHasher = new BcryptPasswordHasher();
 
 const organizationRepository = new PrismaOrganizationRepository();
+const collaborationRepository = new PrismaCollaborationRepository();
 
 const aiCredentialRepository = new PrismaAiCredentialRepository();
 const organizationRole = new PrismaOrganizationRoleAdapter();
@@ -130,6 +133,7 @@ export const container = {
   // identity/organizations
   createOrganization: new CreateOrganizationUseCase(organizationRepository),
   listMyOrganizations: new ListMyOrganizationsUseCase(organizationRepository),
+  manageCollaboration: new ManageCollaborationUseCase(collaborationRepository),
 
   // identity/ai-credentials
   saveProviderCredential: new SaveProviderCredentialUseCase(

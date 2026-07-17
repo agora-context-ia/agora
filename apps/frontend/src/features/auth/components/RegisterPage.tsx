@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,13 +12,15 @@ const PASSWORD_MIN_LENGTH = 8;
 export function RegisterPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = safeReturnTo(searchParams.get('returnTo'));
   const { register, isSubmitting, error } = useRegister();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to={returnTo} replace />;
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -28,7 +30,7 @@ export function RegisterPage() {
     }
     setValidationError(null);
     const success = await register({ name, email, password });
-    if (success) navigate('/', { replace: true });
+    if (success) navigate(returnTo, { replace: true });
   };
 
   const message = validationError ?? error;
@@ -91,7 +93,7 @@ export function RegisterPage() {
             </Button>
             <p className="text-sm text-muted-foreground">
               ¿Ya tienes cuenta?{' '}
-              <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+              <Link to={`/login?returnTo=${encodeURIComponent(returnTo)}`} className="font-medium text-foreground underline-offset-4 hover:underline">
                 Inicia sesión
               </Link>
             </p>
@@ -100,4 +102,9 @@ export function RegisterPage() {
       </Card>
     </div>
   );
+}
+
+/** Allows only an internal application path as the post-auth destination. */
+function safeReturnTo(value: string | null): string {
+  return value?.startsWith('/') && !value.startsWith('//') ? value : '/';
 }

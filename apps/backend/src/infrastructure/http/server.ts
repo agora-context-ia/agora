@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import { env } from '../config/env';
 import { container } from '../container';
 import { startDocumentProcessingWorker } from '../queue/document-processing.queue';
@@ -40,6 +40,15 @@ export function startServer() {
   app.use('/api/organizations/:orgId/spaces/:spaceId/chat', chatRouter);
   app.use('/api/catalogs', catalogsRouter);
   app.use('/api/events', eventsRouter);
+
+  // Safety net: any error a route's own handler didn't recognize (and
+  // re-threw) lands here instead of Express's default HTML error page,
+  // which would break every frontend caller expecting JSON.
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    console.error(err);
+    if (res.headersSent) return;
+    res.status(500).json({ error: 'Error inesperado, intenta de nuevo' });
+  });
 
   // Redis pub/sub -> local SSE sockets, plus the document processing
   // worker (same process for now).

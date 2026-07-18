@@ -9,6 +9,7 @@ import { aiSettingsRouter } from './routes/ai-settings.routes';
 import { authRouter } from './routes/auth.routes';
 import { catalogsRouter } from './routes/catalogs.routes';
 import { chatRouter } from './routes/chat.routes';
+import { collaborationRouter } from './routes/collaboration.routes';
 import { documentsRouter } from './routes/documents.routes';
 import { eventsRouter } from './routes/events.routes';
 import { organizationsRouter } from './routes/organizations.routes';
@@ -31,6 +32,7 @@ export function startServer() {
 
   app.use('/api/auth', authRouter);
   app.use('/api/organizations', organizationsRouter);
+  app.use('/api', collaborationRouter);
   app.use('/api/organizations/:orgId/ai-settings', aiSettingsRouter);
   app.use('/api/organizations/:orgId/spaces', spacesRouter);
   app.use('/api/organizations/:orgId/spaces/:spaceId/documents', documentsRouter);

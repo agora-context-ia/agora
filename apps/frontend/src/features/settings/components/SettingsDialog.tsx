@@ -1,4 +1,5 @@
-import { Settings2, Sparkles, UserRound } from 'lucide-react';
+import { Settings2, Sparkles, UserRound, Users } from 'lucide-react';
+import { CollaborationSettingsSection } from '@/features/collaboration/components/CollaborationSettingsSection';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import { GeneralSettingsSection } from './GeneralSettingsSection';
 
 const SECTIONS: Array<{ value: SettingsSection; label: string; icon: typeof UserRound }> = [
   { value: 'general', label: 'General', icon: UserRound },
+  { value: 'collaboration', label: 'Colaboradores', icon: Users },
   { value: 'ai-models', label: 'Modelos IA', icon: Sparkles },
 ];
 
@@ -28,8 +30,8 @@ export function SettingsDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <DialogHeader className="border-b px-6 py-4">
+      <DialogContent className="flex h-[88vh] max-w-4xl flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="shrink-0 border-b px-6 py-4">
           <DialogTitle className="flex items-center gap-2">
             <Settings2 className="h-4 w-4" /> Configuración
           </DialogTitle>
@@ -38,8 +40,8 @@ export function SettingsDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-[360px]">
-          <nav className="flex w-44 shrink-0 flex-col gap-0.5 border-r bg-muted/30 p-2">
+        <div className="flex min-h-0 flex-1">
+          <nav className="flex w-44 shrink-0 flex-col gap-0.5 overflow-y-auto border-r bg-muted/30 p-2">
             {SECTIONS.map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
@@ -59,7 +61,9 @@ export function SettingsDialog() {
           </nav>
 
           <div className="min-w-0 flex-1 overflow-y-auto p-6">
-            {section === 'general' ? <GeneralSettingsSection /> : <AiModelsSettingsSection />}
+            {section === 'general' && <GeneralSettingsSection />}
+            {section === 'collaboration' && <CollaborationSettingsSection />}
+            {section === 'ai-models' && <AiModelsSettingsSection />}
           </div>
         </div>
       </DialogContent>

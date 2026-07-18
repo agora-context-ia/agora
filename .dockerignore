@@ -1,0 +1,10 @@
+.git
+.github
+.agents
+.codex
+**/node_modules
+**/dist
+**/.env*
+!deploy/.env.production.example
+apps/backend/storage
+public/assets

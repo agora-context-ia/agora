@@ -3,7 +3,7 @@ import { create } from 'zustand';
 // El modal de Settings se abre desde varios lados (engranaje del sidebar,
 // CTA del selector de modelo del chat), por eso el estado vive en un
 // store y el dialog se renderiza una sola vez en el AppShell.
-export type SettingsSection = 'general' | 'ai-models';
+export type SettingsSection = 'general' | 'collaboration' | 'ai-models';
 
 interface SettingsDialogState {
   isOpen: boolean;

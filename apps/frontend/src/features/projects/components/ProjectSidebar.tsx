@@ -5,12 +5,22 @@ import { useProjectStore } from '../application/use-active-project';
 import { ProjectListItem } from './ProjectListItem';
 import { CreateProjectDialog } from './CreateProjectDialog';
 
+interface ProjectSidebarProps {
+  /** Called after a project is picked; lets the mobile drawer close itself. */
+  onSelect?: () => void;
+}
+
 /** Sidebar section listing the active organization's projects. */
-export function ProjectSidebar() {
+export function ProjectSidebar({ onSelect }: ProjectSidebarProps = {}) {
   const { projects, isLoading } = useProjectList();
   const activeProjectId = useProjectStore((state) => state.activeProjectId);
   const setActiveProject = useProjectStore((state) => state.setActiveProject);
   const activeOrganizationId = useActiveOrganizationId();
+
+  const handleSelect = (projectId: string) => {
+    setActiveProject(projectId);
+    onSelect?.();
+  };
 
   // Spaces are filtered by the active organization (organization menu in
   // the left sidebar): each space belongs to exactly one organization.
@@ -39,7 +49,7 @@ export function ProjectSidebar() {
                 key={project.id}
                 project={project}
                 isActive={project.id === activeProjectId}
-                onSelect={setActiveProject}
+                onSelect={handleSelect}
               />
             ))}
         </div>

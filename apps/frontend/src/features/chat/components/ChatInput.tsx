@@ -43,12 +43,12 @@ export function ChatInput({ mode, onModeChange, model, onModelChange, onSend, di
           className="min-h-[52px] border-none px-2 shadow-none focus-visible:ring-0"
           disabled={disabled}
         />
-        <div className="flex items-center justify-between px-1 pb-1 pt-1">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 px-1 pb-1 pt-1">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <ModeSelector mode={mode} onModeChange={onModeChange} />
             <ModelSelector model={model} onModelChange={onModelChange} />
           </div>
-          <Button size="icon" onClick={handleSend} disabled={disabled || !value.trim()}>
+          <Button size="icon" className="shrink-0" onClick={handleSend} disabled={disabled || !value.trim()}>
             <ArrowUp className="h-4 w-4" />
           </Button>
         </div>

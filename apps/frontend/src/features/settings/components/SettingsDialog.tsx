@@ -30,8 +30,8 @@ export function SettingsDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="flex h-[88vh] max-w-4xl flex-col gap-0 overflow-hidden p-0">
-        <DialogHeader className="shrink-0 border-b px-6 py-4">
+      <DialogContent className="flex h-[100dvh] max-w-4xl flex-col gap-0 overflow-hidden p-0 md:h-[88vh]">
+        <DialogHeader className="shrink-0 border-b px-4 py-4 sm:px-6">
           <DialogTitle className="flex items-center gap-2">
             <Settings2 className="h-4 w-4" /> Configuración
           </DialogTitle>
@@ -40,15 +40,15 @@ export function SettingsDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1">
-          <nav className="flex w-44 shrink-0 flex-col gap-0.5 overflow-y-auto border-r bg-muted/30 p-2">
+        <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+          <nav className="flex shrink-0 gap-0.5 overflow-x-auto border-b bg-muted/30 p-2 md:w-44 md:flex-col md:overflow-y-auto md:border-b-0 md:border-r">
             {SECTIONS.map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setSection(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-accent',
+                  'flex shrink-0 items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-accent',
                   section === value
                     ? 'bg-accent font-medium text-accent-foreground'
                     : 'text-muted-foreground',
@@ -60,7 +60,7 @@ export function SettingsDialog() {
             ))}
           </nav>
 
-          <div className="min-w-0 flex-1 overflow-y-auto p-6">
+          <div className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
             {section === 'general' && <GeneralSettingsSection />}
             {section === 'collaboration' && <CollaborationSettingsSection />}
             {section === 'ai-models' && <AiModelsSettingsSection />}

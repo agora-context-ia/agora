@@ -18,6 +18,13 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@contexthub-ai/frontend", "dev", "--port", "5273", "--strictPort"],
       "port": 5273
+    },
+    {
+      "name": "frontend-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@contexthub-ai/frontend", "dev"],
+      "port": 5173,
+      "autoPort": true
     }
   ]
 }

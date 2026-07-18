@@ -50,9 +50,9 @@ export function ModelSelector({ model, onModelChange }: ModelSelectorProps) {
 
   if (isLoading) {
     return (
-      <Button variant="outline" size="sm" className="gap-1.5" disabled>
-        <Cpu className="h-3.5 w-3.5" />
-        Cargando…
+      <Button variant="outline" size="sm" className="min-w-0 max-w-full gap-1.5" disabled>
+        <Cpu className="h-3.5 w-3.5 shrink-0" />
+        <span className="truncate">Cargando…</span>
       </Button>
     );
   }
@@ -62,11 +62,11 @@ export function ModelSelector({ model, onModelChange }: ModelSelectorProps) {
       <Button
         variant="outline"
         size="sm"
-        className="gap-1.5 text-muted-foreground"
+        className="min-w-0 max-w-full gap-1.5 text-muted-foreground"
         onClick={() => openSettings('ai-models')}
       >
-        <Cpu className="h-3.5 w-3.5" />
-        Configurar modelo de IA →
+        <Cpu className="h-3.5 w-3.5 shrink-0" />
+        <span className="truncate">Configurar modelo de IA →</span>
       </Button>
     );
   }
@@ -76,10 +76,10 @@ export function ModelSelector({ model, onModelChange }: ModelSelectorProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Cpu className="h-3.5 w-3.5" />
-          {activeOption.label}
-          <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+        <Button variant="outline" size="sm" className="min-w-0 max-w-full gap-1.5">
+          <Cpu className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{activeOption.label}</span>
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">

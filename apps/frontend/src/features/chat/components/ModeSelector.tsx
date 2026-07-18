@@ -20,10 +20,10 @@ export function ModeSelector({ mode, onModeChange }: ModeSelectorProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Sparkles className="h-3.5 w-3.5" />
-          {activeMode.label}
-          <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+        <Button variant="outline" size="sm" className="min-w-0 max-w-full gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{activeMode.label}</span>
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">

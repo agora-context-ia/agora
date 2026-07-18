@@ -18,9 +18,16 @@ function getInitials(name: string): string {
     .join('');
 }
 
+interface UserSidebarProps {
+  /** 'desktop' renders the collapsible fixed-width rail; 'mobile' fills its drawer at full width, always expanded. */
+  variant?: 'desktop' | 'mobile';
+}
+
 /** Left sidebar: organization menu, projects, user info and settings trigger. */
-export function UserSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+export function UserSidebar({ variant = 'desktop' }: UserSidebarProps) {
+  const isMobile = variant === 'mobile';
+  const [collapsedState, setCollapsed] = useState(false);
+  const collapsed = isMobile ? false : collapsedState;
   const { user } = useCurrentUser();
   const { logout, isLoggingOut } = useLogout();
   const { theme, toggleTheme } = useTheme();
@@ -30,7 +37,7 @@ export function UserSidebar() {
     <aside
       className={cn(
         'flex h-full shrink-0 flex-col border-r bg-background transition-[width] duration-200',
-        collapsed ? 'w-16' : 'w-56',
+        isMobile ? 'w-full' : collapsed ? 'w-16' : 'w-56',
       )}
     >
       {/* App brand: icon-only when collapsed, icon + wordmark expanded. */}
@@ -57,15 +64,17 @@ export function UserSidebar() {
           )}
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 shrink-0"
-          onClick={() => setCollapsed((value) => !value)}
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          <span className="sr-only">{collapsed ? 'Expandir panel' : 'Colapsar panel'}</span>
-        </Button>
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0"
+            onClick={() => setCollapsed((value) => !value)}
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            <span className="sr-only">{collapsed ? 'Expandir panel' : 'Colapsar panel'}</span>
+          </Button>
+        )}
       </div>
 
       <nav className={cn('flex-1 overflow-y-auto p-2', collapsed && 'flex flex-col items-center')}>

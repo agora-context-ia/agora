@@ -7,8 +7,10 @@ if [ -e "$output" ]; then
   exit 1
 fi
 
-postgres_password="$(openssl rand -base64 36 | tr -d '\n')"
-redis_password="$(openssl rand -base64 36 | tr -d '\n')"
+# hex only: these values are interpolated into DATABASE_URL/REDIS_URL and
+# must not contain URL-reserved characters
+postgres_password="$(openssl rand -hex 24)"
+redis_password="$(openssl rand -hex 24)"
 encryption_key="$(openssl rand -hex 32)"
 
 umask 077
